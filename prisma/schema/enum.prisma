@@ -1,0 +1,15 @@
+enum ActiveStatus {
+    ACTIVE 
+    BLOCKED
+}
+
+enum Role {
+    USER 
+    LIBRARYAN
+    MODARATOR
+}
+
+enum Shift {
+    MORNING
+    DAY
+}
