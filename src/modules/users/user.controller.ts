@@ -22,6 +22,21 @@ const createUser =async(req:Request,res:Response)=>{
     }
 };
 
+const getAllUser=async(req:Request,res:Response)=>{
+    try {
+        const user = await userService.getAllUser();
+
+        res.status(200).json({
+            success : true,
+            message : "All User retrieved successfully. Its just texting purpose",
+            data : user
+        })
+    } catch (error) {
+        console.log(error);
+    }
+}
+
 export const userController ={
-    createUser
+    createUser,
+    getAllUser
 }

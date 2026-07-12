@@ -40,6 +40,12 @@ const createUserIntoDB =async(payload:Iuser)=>{
     return createuser
 };
 
+const getAllUser =async()=>{
+    const user = await prisma.user.findMany();
+    return {user}
+}
+
 export const userService = {
-    createUserIntoDB
+    createUserIntoDB,
+    getAllUser
 }

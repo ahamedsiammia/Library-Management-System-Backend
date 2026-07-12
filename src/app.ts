@@ -16,6 +16,9 @@ app.use(cookieParser());
 app.use(express.urlencoded({extended : true}));
 
 
+app.use("/user",userRoute)
+
+
 app.get("/",async(req:Request,res:Response)=>{
     res.send({
         SUCCESS: true,
@@ -25,6 +28,5 @@ app.get("/",async(req:Request,res:Response)=>{
     })
 })
 
-app.use("/user",userRoute)
 
 export default app ;
