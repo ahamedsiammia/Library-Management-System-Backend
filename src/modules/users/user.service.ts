@@ -1,51 +1,57 @@
 import config from "../../config";
 import { prisma } from "../../lib/prisma";
 import { Iuser } from "./user.interface";
-import bcrypt from "bcrypt"
+import bcrypt from "bcrypt";
 
-const createUserIntoDB =async(payload:Iuser)=>{
+const createUserIntoDB = async (payload: Iuser) => {
+  const { name, email, password, instituteName, roll, semester, shift } =
+    payload;
 
-    const {name,email,password,instituteName,roll,semester,shift} = payload;
+  const existingEmail = await prisma.user.findUnique({
+    where: { email },
+  });
 
-    const isExistUser = await prisma.user.findUnique({
-        where :{
-            email : email,
-            roll : roll
-        }
-    });
+  if (existingEmail) {
+    throw new Error("An account with this email already exists.");
+  }
 
-    if(isExistUser){
-        throw new Error("Email and Roll already exists.")
-    };
+  const existingRoll = await prisma.user.findUnique({
+    where: { roll },
+  });
 
-    const hashPassword = await bcrypt.hash(password,Number(config.bcrypt_salt_rounds));
+  if (existingRoll) {
+    throw new Error("This roll number is already registered.");
+  }
 
+  const hashPassword = await bcrypt.hash(
+    password,
+    Number(config.bcrypt_salt_rounds),
+  );
 
-    const createuser = await prisma.user.create({
-        data:{
-            name,
-            email,
-            password : hashPassword,
-            instituteName,
-            roll,
-            semester,
-            shift
-            
-        },
-        omit:{
-            password : true
-        }
-    })
+  const createuser = await prisma.user.create({
+    data: {
+      name,
+      email,
+      password: hashPassword,
+      instituteName,
+      roll,
+      semester,
+      shift,
+    },
+    omit: {
+      password: true,
+    },
+  });
 
-    return createuser
+  return createuser;
 };
 
-const getAllUser =async()=>{
-    const user = await prisma.user.findMany();
-    return {user}
-}
+const getAllUser = async () => {
+  const user = await prisma.user.findMany();
+  return { user };
+};
 
 export const userService = {
-    createUserIntoDB,
-    getAllUser
-}
+  createUserIntoDB,
+  getAllUser,
+};

@@ -15,7 +15,7 @@ const createUser =async(req:Request,res:Response)=>{
                res.status(500).json({
             success : true,
             statusCode : 201,
-            message : "User Created Not Successfully",
+            message : error.message,
             data : [],
             error : error.message
         }) 
