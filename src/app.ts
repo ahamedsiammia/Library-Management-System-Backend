@@ -7,10 +7,26 @@ import { userRoute } from "./modules/users/user.route";
 
 const app : Application = express();
 
-app.use(cors({
-        origin: process.env.app_url,
-        credentials: true,
-}))
+const allowedOrigins = [
+  process.env.APP_URL,
+  process.env.PRODUCTION_URL,
+];
+
+app.use(
+  cors({
+    origin(origin, callback) {
+      // Postman বা server-to-server request-এর জন্য
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error("Not allowed by CORS"));
+    },
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({extended : true}));
