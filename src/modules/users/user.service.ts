@@ -70,7 +70,20 @@ const loginUserIntoDB = async(payload:ILoin)=>{
     throw new Error("Incorrect password.")
   }
 
-  const {id,instituteName,role,shift,name} = isExistUser
+  const {id,instituteName,role,shift,name,activeStatus,createdAt,roll,semester,updatedAt} = isExistUser
+
+  const user ={
+    id,
+    instituteName,
+    role,
+    shift,
+    name,
+    activeStatus,
+    createdAt,
+    roll,
+    semester,
+    updatedAt 
+  }
 
   const jwtPayload = {
       name ,
@@ -84,7 +97,7 @@ const loginUserIntoDB = async(payload:ILoin)=>{
 
   const refreshToken = await createToken(jwtPayload as  jwtPayload,config.jwt_refresh_secret as string,config.jwt_refresh_expires_in as SignOptions)
 
-  return {accessToken,refreshToken}
+  return {...user,accessToken,refreshToken}
 }
 
 
