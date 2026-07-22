@@ -11,5 +11,5 @@ enum Role {
 
 enum Shift {
     MORNING
-    DAY
+    EVENING
 }

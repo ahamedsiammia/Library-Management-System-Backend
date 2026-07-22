@@ -1,7 +1,9 @@
+import jwt, { SignOptions } from "jsonwebtoken";
 import config from "../../config";
 import { prisma } from "../../lib/prisma";
-import { Iuser } from "./user.interface";
+import { ILoin, Iuser, jwtPayload } from "./user.interface";
 import bcrypt from "bcrypt";
+import { createToken } from "../../utils/token";
 
 const createUserIntoDB = async (payload: Iuser) => {
   const { name, email, password, instituteName, roll, semester, shift } =
@@ -46,6 +48,49 @@ const createUserIntoDB = async (payload: Iuser) => {
   return createuser;
 };
 
+
+const loginUserIntoDB = async(payload:ILoin)=>{
+  const {email,password} = payload;
+
+  const isExistUser = await prisma.user.findUnique({
+    where : {
+      email
+    }
+  });
+
+  if(!isExistUser){
+    throw new Error("An account with this email not exists.")
+  }
+
+  const hashPassword = isExistUser.password
+
+  const isCheckPassword = await bcrypt.compare(password,hashPassword);
+
+  if(!isCheckPassword){
+    throw new Error("Incorrect password.")
+  }
+
+  const {id,instituteName,role,shift,name} = isExistUser
+
+  const jwtPayload = {
+      name ,
+      id,
+      instituteName,
+      shift,
+      role
+  };
+
+  const accessToken = await createToken(jwtPayload as  jwtPayload,config.jwt_access_secret as string,config.jwt_access_expires_in as SignOptions)
+
+  const refreshToken = await createToken(jwtPayload as  jwtPayload,config.jwt_refresh_secret as string,config.jwt_refresh_expires_in as SignOptions)
+
+  return {accessToken,refreshToken}
+}
+
+
+
+
+
 const getAllUser = async () => {
   const user = await prisma.user.findMany();
   return { user };
@@ -53,5 +98,6 @@ const getAllUser = async () => {
 
 export const userService = {
   createUserIntoDB,
+  loginUserIntoDB,
   getAllUser,
 };
