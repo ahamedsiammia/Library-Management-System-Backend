@@ -27,6 +27,8 @@ app.use(
     credentials: true,
   })
 );
+
+
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({extended : true}));
@@ -34,7 +36,7 @@ app.use(express.urlencoded({extended : true}));
 
 app.use("/user",userRoute)
 
-
+console.log(allowedOrigins);
 app.get("/",async(req:Request,res:Response)=>{
     res.send({
         SUCCESS: true,
