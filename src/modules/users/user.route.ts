@@ -3,12 +3,14 @@ import { userController } from "./user.controller";
 
 const router = Router();
 
-router.post("/register",userController.createUser);
+router.post("/register", userController.createUser);
 
-router.post("/login",userController.loginUser)
+router.post("/login", userController.loginUser);
 
-router.get("/get",userController.getAllUser)
+router.get("/get", userController.getAllUser);
 
+router.get("/me", userController.getMe);
 
+router.post("/logout", userController.logoutUser);
 
-export const userRoute = router;
+export const userRoute = router;

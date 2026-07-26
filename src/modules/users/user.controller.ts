@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import { userService } from "./user.service";
 import { sendResponse } from "../../utils/sendResponse";
+import { varifyToken } from "../../utils/token";
+import { prisma } from "../../lib/prisma";
 
 const createUser =async(req:Request,res:Response)=>{
     const payload = req.body;
@@ -79,8 +81,94 @@ const getAllUser=async(req:Request,res:Response)=>{
     }
 }
 
-export const userController ={
+const getMe = async (req: Request, res: Response) => {
+  try {
+    const token = req.cookies.accessToken
+      ? req.cookies.accessToken
+      : req.headers.authorization?.startsWith("Bearer")
+        ? req.headers.authorization?.split(" ")[1]
+        : req.headers.authorization;
+
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: "Not authenticated",
+        data: null,
+      });
+    }
+
+    const verified = await varifyToken(
+      token,
+      process.env.JWT_ACCESS_SECRET as string
+    );
+
+    if (!verified.success || !verified.data) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid or expired token",
+        data: null,
+      });
+    }
+
+    const { id } = verified.data;
+
+    const user = await prisma.user.findUnique({
+      where: { id },
+      omit: { password: true },
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+        data: null,
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "User fetched successfully",
+      data: user,
+    });
+  } catch (error: any) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+      data: null,
+    });
+  }
+};
+
+const logoutUser = async (req: Request, res: Response) => {
+  try {
+    res.clearCookie("accessToken", {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+    });
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+    });
+    return res.status(200).json({
+      success: true,
+      message: "Logged out successfully",
+      data: null,
+    });
+  } catch (error: any) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+      data: null,
+    });
+  }
+};
+
+export const userController = {
     createUser,
     loginUser,
-    getAllUser
-}
+    getAllUser,
+    getMe,
+    logoutUser,
+};

@@ -11,6 +11,7 @@ const app : Application = express();
 const allowedOrigins = [
   process.env.APP_URL,
   process.env.PRODUCTION_URL,
+  "http://localhost:3000",
 ];
 
 app.use(
@@ -37,9 +38,10 @@ app.use(express.urlencoded({extended : true}));
 
 
 
-app.use("/user",userRoute)
+app.use("/user", userRoute)
 
-app.use("/user",BookRoutes)
+app.use("/", BookRoutes)
+
 
 
 
