@@ -2,6 +2,7 @@ import cookieParser from "cookie-parser";
 import express, { Application, Request, Response } from "express";
 import cors from "cors"
 import { userRoute } from "./modules/users/user.route";
+import { BookRoutes } from "./modules/books/books.route";
 
 
 
@@ -38,7 +39,7 @@ app.use(express.urlencoded({extended : true}));
 
 app.use("/user",userRoute)
 
-
+app.use("/user",BookRoutes)
 
 
 
