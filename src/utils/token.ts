@@ -25,3 +25,21 @@ export const createToken =async(payload :jwtPayload,secret : string,expiresIn : 
 }
 
 }
+
+export const varifyToken = async(token:string,secret:string)=>{
+    try {
+        const varifyedToken = await jwt.verify(token,secret)
+
+        
+        
+        return {
+            success:true,
+            data : varifyedToken as jwtPayload
+        }
+    } catch (error : any) {
+        return {
+            success : false,
+            message : error.message
+        }
+    }
+}

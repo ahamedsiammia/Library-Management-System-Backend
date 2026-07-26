@@ -23,4 +23,5 @@ export interface jwtPayload {
       instituteName : string
       shift : Shift
       role : Role
+      roll : number
   };

@@ -90,7 +90,8 @@ const loginUserIntoDB = async(payload:ILoin)=>{
       id,
       instituteName,
       shift,
-      role
+      role,
+      roll
   };
 
   const accessToken = await createToken(jwtPayload as  jwtPayload,config.jwt_access_secret as string,config.jwt_access_expires_in as SignOptions)
