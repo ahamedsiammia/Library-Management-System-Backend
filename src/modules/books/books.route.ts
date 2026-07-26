@@ -5,6 +5,8 @@ const router = Router();
 
 router.get("/books", BookControllers.getAllBooks);
 
+router.get("/books/:id", BookControllers.getBookById);
+
 router.post("/create-books", BookControllers.createBook);
 
 export const BookRoutes = router;

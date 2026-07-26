@@ -39,7 +39,35 @@ const createBook = async (req: Request, res: Response) => {
   }
 };
 
+const getBookById = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const result = await BookServices.getBookById(id);
+
+    if (!result) {
+      return res.status(404).json({
+        success: false,
+        message: "Book not found",
+        data: null,
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Book retrieved successfully",
+      data: result,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Something went wrong",
+      error,
+    });
+  }
+};
+
 export const BookControllers = {
   getAllBooks,
-  createBook
+  createBook,
+  getBookById,
 };
