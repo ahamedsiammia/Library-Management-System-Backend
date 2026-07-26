@@ -1,0 +1,37 @@
+model Books {
+  id           String  @id @default(uuid())
+  title        String
+  titleBn      String?
+  author       String
+  authorBio    String? @db.Text
+  category     String
+  categoryBn   String?
+  rating       Float   @default(0.0)
+  reviewsCount Int     @default(0)
+  badge        String?
+  coverImage   String
+
+  isbn            String  @unique
+  publisher       String
+  publisherBn     String?
+  publicationYear Int
+  edition         String?
+  language        String  @default("English")
+  pages           Int
+  format          String? @default("Paperback")
+
+  totalCopies     Int        @default(1)
+  copiesAvailable Int        @default(1)
+  shelfLocation   String
+  status          BookStatus @default(AVAILABLE)
+
+  description   String   @db.Text
+  descriptionBn String?  @db.Text
+  keyTopics     String[]
+  tags          String[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("books")
+}

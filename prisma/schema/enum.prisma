@@ -1,15 +1,21 @@
 enum ActiveStatus {
-    ACTIVE 
-    BLOCKED
+  ACTIVE
+  BLOCKED
 }
 
 enum Role {
-    USER 
-    LIBRARYAN
-    MODARATOR
+  USER
+  LIBRARYAN
+  MODARATOR
 }
 
 enum Shift {
-    MORNING
-    EVENING
+  MORNING
+  EVENING
+}
+
+enum BookStatus {
+  AVAILABLE
+  RESERVED
+  OUT_OF_STOCK
 }
