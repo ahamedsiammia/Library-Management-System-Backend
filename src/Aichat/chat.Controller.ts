@@ -1,10 +1,8 @@
 // src/controllers/chatController.ts
-import { PrismaClient } from "@prisma/client/extension";
 import { Request, Response } from "express";
 import { generateReply } from "./chat.Service";
 import { ChactRole } from "../../generated/prisma/enums";
-
-const prisma = new PrismaClient()
+import { prisma } from "../lib/prisma";
 
 export async function handleChat(req: Request, res: Response) {
   try {
@@ -34,13 +32,13 @@ export async function handleChat(req: Request, res: Response) {
     }));
 
     // Gemini থেকে reply নাও
-    const aiReply = await generateReply(history, message);
+    const aiReply = await generateReply(history as any, message);
 
     // দুইটা message ই DB তে save করো
     await prisma.message.createMany({
       data: [
-        { conversationId: convoId, role: "user", content: message },
-        { conversationId: convoId, role: "model", content: aiReply },
+        { conversationId: convoId, role: "USER", content: message },
+        { conversationId: convoId, role: "MODEL", content: aiReply },
       ],
     });
 
@@ -48,8 +46,17 @@ export async function handleChat(req: Request, res: Response) {
       conversationId: convoId,
       reply: aiReply,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Chat error:", error);
-    return res.status(500).json({ error: "Something went wrong" });
+
+    // Gemini API quota exceeded error handling
+    if (error?.status === 429 || error?.message?.includes("429")) {
+      return res.status(429).json({
+        error: "AI সার্ভিস এই মুহূর্তে ব্যস্ত। অনুগ্রহ করে কিছুক্ষণ পর আবার চেষ্টা করুন।",
+        code: "QUOTA_EXCEEDED",
+      });
+    }
+
+    return res.status(500).json({ error: "কিছু একটা সমস্যা হয়েছে। পরে আবার চেষ্টা করুন।" });
   }
 }

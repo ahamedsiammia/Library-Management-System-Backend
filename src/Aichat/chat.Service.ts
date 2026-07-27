@@ -1,10 +1,12 @@
 // src/services/geminiService.ts
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import config from "../config";
+import { ChactRole } from "../../generated/prisma/enums";
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY as string);
+const genAI = new GoogleGenerativeAI(config.gemini_api_key as string);
 
 export async function generateReply(
-  history: { role: "user" | "model"; parts: { text: string }[] }[],
+  history: { role: ChactRole; parts: { text: string }[] }[],
   newMessage: string
 ) {
   const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
