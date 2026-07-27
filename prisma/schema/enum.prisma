@@ -19,3 +19,10 @@ enum BookStatus {
   RESERVED
   OUT_OF_STOCK
 }
+
+enum ChactRole {
+  USER
+  LIBRARYAN
+  MODARATOR
+  MODEL 
+}

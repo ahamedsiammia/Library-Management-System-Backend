@@ -42,7 +42,7 @@ const createBook = async (req: Request, res: Response) => {
 const getBookById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const result = await BookServices.getBookById(id);
+    const result = await BookServices.getBookById(id as string);
 
     if (!result) {
       return res.status(404).json({
