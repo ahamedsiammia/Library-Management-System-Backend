@@ -46,7 +46,7 @@ app.use("/moderator", ModeratorRoutes)
 
 app.use("/", BookRoutes)
 
-app.use("/aichat",POST);
+app.post("/aichat",POST);
 
 
 console.log(allowedOrigins);
