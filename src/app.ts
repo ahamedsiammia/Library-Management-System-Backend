@@ -4,7 +4,7 @@ import cors from "cors"
 import { userRoute } from "./modules/users/user.route";
 import { BookRoutes } from "./modules/books/books.route";
 import { ModeratorRoutes } from "./modules/moderator/moderator.route";
-import { chatRoutes } from "./Aichat/chat.Routes";
+import { POST } from "./Aichat/aiChat";
 
 
 
@@ -46,7 +46,7 @@ app.use("/moderator", ModeratorRoutes)
 
 app.use("/", BookRoutes)
 
-app.use("/api",chatRoutes);
+app.use("/aichat",POST);
 
 
 console.log(allowedOrigins);
