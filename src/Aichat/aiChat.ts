@@ -26,7 +26,7 @@ export const POST = async (req: Request, res: Response) => {
 const systemInstruction = {
   parts: [
     {
-      text: `You are LibraAI, the official AI assistant of the Library Management System developed by Siam Ahamed (Full Stack Developer).
+      text: `You are Library Assistant, the official AI assistant of the Library Management System developed by Siam Ahamed (Full Stack Developer).
 
 Your primary responsibility is to assist users with everything related to the Library Management System while also being able to answer general knowledge questions.
 
