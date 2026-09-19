@@ -5,8 +5,8 @@ enum ActiveStatus {
 
 enum Role {
   USER
-  LIBRARYAN
-  MODARATOR
+  ADMIN
+  LIBRARIAN
 }
 
 enum Shift {
@@ -22,7 +22,7 @@ enum BookStatus {
 
 enum ChactRole {
   USER
-  LIBRARYAN
-  MODARATOR
+  ADMIN
+  LIBRARIAN
   MODEL 
 }

@@ -2,7 +2,7 @@ import { prisma } from "../../lib/prisma";
 import bcrypt from "bcrypt";
 import config from "../../config";
 import { ActiveStatus, Role } from "../../../generated/prisma/enums";
-import { ICreateLibrarian, ISystemSettings } from "./moderator.interface";
+import { ICreateLibrarian, ISystemSettings } from "./librarian.interface";
 
 // System settings stored in-memory / state (can be extended to DB model)
 let globalSettings: ISystemSettings = {
@@ -27,7 +27,7 @@ const getDashboardStats = async () => {
   });
 
   const totalLibrarians = await prisma.user.count({
-    where: { role: Role.LIBRARYAN },
+    where: { role: Role.ADMIN },
   });
 
   const totalBooks = await prisma.books.count();
@@ -123,7 +123,7 @@ const createLibrarian = async (payload: ICreateLibrarian) => {
       instituteName,
       semester,
       shift,
-      role: Role.LIBRARYAN,
+      role: Role.ADMIN,
       activeStatus: ActiveStatus.ACTIVE,
     },
     omit: { password: true },
@@ -171,7 +171,7 @@ const getActivityLogs = async () => {
   ];
 };
 
-export const ModeratorServices = {
+export const LibrarianServices = {
   getDashboardStats,
   getAllUsers,
   updateUserStatus,
