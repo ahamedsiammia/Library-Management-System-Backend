@@ -16,6 +16,10 @@ export interface ILoin {
     password : string
 }
 
+export interface IGoogleLoinPayload {
+	idToken: string;
+}
+
 
 export interface jwtPayload {
       name : string

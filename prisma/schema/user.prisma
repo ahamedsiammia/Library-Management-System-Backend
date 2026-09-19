@@ -1,15 +1,21 @@
 model User {
-  id            String       @id @default(uuid())
-  name          String       @db.VarChar(255)
-  email         String       @unique @db.VarChar(255)
-  password      String       @db.VarChar(255)
-  roll          Int          @unique
-  instituteName String       @db.VarChar(120)
-  semester      String       @db.VarChar(20)
-  shift         String       @db.VarChar(20)
-  activeStatus  ActiveStatus @default(ACTIVE)
-  role          Role         @default(USER)
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
+  id                 String       @id @default(uuid())
+  name               String       @db.VarChar(255)
+  email              String       @unique @db.VarChar(255)
+  password           String?      @db.VarChar(255)
+  roll               Int?         @unique
+  instituteName      String?      @db.VarChar(120)
+  semester           String?       @db.VarChar(20)
+  shift              String?      @db.VarChar(20)
+  activeStatus       ActiveStatus @default(ACTIVE)
+  role               Role         @default(USER)
+  emailVerified      Boolean      @default(false)
+  authProvider       authProvider @default(CREDENTIAL)
+  googleId           String?      @unique
+  needPasswordChange Boolean      @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@map("users")
 }

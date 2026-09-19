@@ -13,4 +13,6 @@ router.get("/me", userController.getMe);
 
 router.post("/logout", userController.logoutUser);
 
-export const userRoute = router;
+router.post("/google", userController.googleLogin);
+
+export const userRoute = router;

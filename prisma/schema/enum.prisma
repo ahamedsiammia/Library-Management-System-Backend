@@ -19,3 +19,8 @@ enum BookStatus {
   RESERVED
   OUT_OF_STOCK
 }
+
+enum authProvider {
+  GOOGLE
+  CREDENTIAL
+}
