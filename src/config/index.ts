@@ -24,5 +24,9 @@ export default {
 
     email_sender : process.env.EMAIL_SENDER,
 	smtp_user : process.env.SMTP_USER,
-	smtp_password : process.env.SMTP_PASSWORD
+	smtp_password : process.env.SMTP_PASSWORD,
+
+    store_id : process.env.STORE_ID,
+    store_passwd :process.env.STORE_PASSWORD,
+    local_app_url :process.env.LOCAL_APP_URL
 }

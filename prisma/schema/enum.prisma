@@ -24,3 +24,26 @@ enum authProvider {
   GOOGLE
   CREDENTIAL
 }
+
+enum BookingStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  ISSUED
+  RETURNED
+  OVERDUE
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum PaymentType {
+  RENT
+  FINE
+}
+

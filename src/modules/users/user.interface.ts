@@ -54,3 +54,10 @@ export interface IUpdateUserProfile {
   semester?: string;
   shift?: string;
 }
+
+export interface IRequestUser {
+ name: string;
+ id: string;
+ role: Role;
+ roll: number;
+} 

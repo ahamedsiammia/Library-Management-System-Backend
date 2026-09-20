@@ -1,0 +1,32 @@
+
+
+model Booking {
+  id     String @id @default(uuid())
+  userId String
+  bookId String
+
+  user User  @relation(fields: [userId], references: [id])
+  book Books @relation(fields: [bookId], references: [id])
+
+  status BookingStatus @default(PENDING)
+
+  rentFee Float     @default(10.0)
+  isPaid  Boolean   @default(false)
+
+  requestDate DateTime  @default(now())
+  approvedAt  DateTime?
+  bookingDate DateTime?
+  dueDate     DateTime?
+  returnDate  DateTime?
+
+  fineAmount Float   @default(0.0)
+  finePaid   Boolean @default(false)
+
+  rejectionReason String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  payments Payment[]  
+  @@map("bookings")
+}

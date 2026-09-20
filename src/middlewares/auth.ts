@@ -3,6 +3,7 @@ import { sendResponse } from "../utils/sendResponse";
 import { prisma } from "../lib/prisma";
 import { Role } from "../../generated/prisma/enums";
 import { varifyToken } from "../utils/token";
+import { email } from "zod";
 
 declare global {
   namespace Express {
@@ -79,7 +80,7 @@ export const auth = (...requierdRole: Role[]) => {
     }
 
     req.user = {
-      id: id,
+      id: id as string,
       name: name,
       role: role as Role,
       roll : roll as number,

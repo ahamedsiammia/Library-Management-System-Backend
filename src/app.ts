@@ -7,32 +7,34 @@ import { POST } from "./Aichat/aiChat";
 import { LibrarianRoutes } from "./modules/librarian/librarian.route";
 import { prisma } from "./lib/prisma";
 import { sendResponse } from "./utils/sendResponse";
+import { bookingRouter } from "./modules/Bookings/booking.route";
+import { paymentRouter } from "./modules/payment/payment.route";
 
 
 
 const app : Application = express();
 
-const allowedOrigins = [
-  process.env.APP_URL,
-  process.env.PRODUCTION_URL,
-  "http://localhost:3000",
-];
+// const allowedOrigins = [
+//   process.env.APP_URL,
+//   process.env.PRODUCTION_URL,
+//   "http://localhost:3000",
+// ];
 
-app.use(
-  cors({
-    origin(origin, callback) {
-      // Postman বা server-to-server request-এর জন্য
-      if (!origin) return callback(null, true);
+// app.use(
+//   cors({
+//     origin(origin, callback) {
+//       // Postman বা server-to-server request-এর জন্য
+//       if (!origin) return callback(null, true);
 
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
+//       if (allowedOrigins.includes(origin)) {
+//         return callback(null, true);
+//       }
 
-      return callback(new Error("Not allowed by CORS"));
-    },
-    credentials: true,
-  })
-);
+//       return callback(new Error("Not allowed by CORS"));
+//     },
+//     credentials: true,
+//   })
+// );
 
 
 app.use(express.json());
@@ -44,9 +46,13 @@ app.use(express.urlencoded({extended : true}));
 
 app.use("/user", userRoute)
 
-app.use("/moderator", LibrarianRoutes)
+app.use("/librarian", LibrarianRoutes)
 
 app.use("/", BookRoutes)
+
+app.use("/booking",bookingRouter)
+
+app.use("/payment",paymentRouter)
 
 app.post("/aichat",POST);
 
