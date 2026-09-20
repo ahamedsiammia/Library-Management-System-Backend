@@ -1,4 +1,5 @@
 import z, { email } from "zod"
+import { Shift } from "../../../generated/prisma/enums";
 
 
 const userLoginZodSchema =z.object({
@@ -63,8 +64,7 @@ const UpdateUserProfileSchema = z.object({
     .string()
     .optional(),
 
-  shift: z
-    .string()
+  shift: z.enum(Shift)
     .optional(),
 });
 

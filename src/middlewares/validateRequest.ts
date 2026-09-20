@@ -4,7 +4,8 @@ import z, { ZodObject } from "zod";
 export const validateRequest =(zodSchema: z.ZodObject) =>{
     return async(req:Request,res:Response,next:NextFunction)=>{
 
-    const payload = req.body ?? {};
+   try {
+     const payload = req.body ?? {};
 
     const result = zodSchema.safeParse(payload)
 
@@ -21,5 +22,8 @@ export const validateRequest =(zodSchema: z.ZodObject) =>{
     req.body = result.data 
 
     next();
+   } catch (error) {
+    next(error)
+   }
 }
 }

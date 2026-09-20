@@ -1,15 +1,15 @@
 import { Prisma } from "../../../generated/prisma/client";
 import { prisma } from "../../lib/prisma";
-import { IBookQuery, ICreateBook } from "./books.interface";
+import { IBookQuery, ICreateBook, IUpdateBook } from "./books.interface";
 
 const getAllBooks = async (query: IBookQuery) => {
   const page = Number(query.page) || 1;
   const limit = 12;
   const skip = (page - 1) * limit;
 
-  const whereConditions: Prisma.BooksWhereInput = {};
+ const whereConditions: Prisma.BooksWhereInput = {};
 
-  // Search
+// Search
   if (query.search) {
     whereConditions.OR = [
       {
@@ -82,8 +82,18 @@ const getBookById = async (id: string) => {
   return result;
 };
 
+const updateBook = async (id: string, payload: IUpdateBook) => {
+  const result = await prisma.books.update({
+    where: { id },
+    data: payload,
+  });
+
+  return result;
+};
+
 export const BookServices = {
   getAllBooks,
   createBook,
   getBookById,
+  updateBook
 };
