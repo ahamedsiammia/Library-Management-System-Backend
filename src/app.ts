@@ -51,7 +51,6 @@ app.use("/", BookRoutes)
 app.post("/aichat",POST);
 
 
-console.log(allowedOrigins);
 app.get("/",async(req:Request,res:Response)=>{
     res.send({
         SUCCESS: true,

@@ -11,7 +11,7 @@ const createUser =async(req:Request,res:Response)=>{
         res.status(201).json({
             success : true,
             statusCode : 201,
-            message : "User Created Successfully",
+            message : "Verification code sent successfully. Please check your email",
             data : user
         })
     } catch (error: any) {

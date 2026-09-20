@@ -1,11 +1,13 @@
 import { Router } from "express";
 import { userController } from "./user.controller";
+import { validateRequest } from "../../middlewares/validateRequest";
+import { userValidation } from "./uservalidation";
 
 const router = Router();
 
-router.post("/register", userController.createUser);
+router.post("/register",validateRequest(userValidation.userRegistrationSchema), userController.createUser);
 
-router.post("/login", userController.loginUser);
+router.post("/login",validateRequest(userValidation.userLoginZodSchema), userController.loginUser);
 
 router.get("/get", userController.getAllUser);
 
