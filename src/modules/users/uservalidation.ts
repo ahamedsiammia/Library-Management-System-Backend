@@ -43,11 +43,38 @@ const ResetPasswordZodSchema = z.object({
   				.refine((val) => /[!@#$%^&*]/.test(val),"Password must contain at least one special character (!@#$%^&*)"),
 })
 
+const UpdateUserProfileSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(1, "Name is required")
+    .max(255, "Name must be at most 255 characters")
+    .optional(),
+    
+  roll: z.int()
+    .positive()
+    .optional(),
+
+  instituteName: z
+    .string()
+    .optional(),
+
+  semester: z
+    .string()
+    .optional(),
+
+  shift: z
+    .string()
+    .optional(),
+});
+
+
 export const userValidation = {
     userLoginZodSchema,
     userRegistrationSchema,
     ForgotPasswordZodSchema,
-    ResetPasswordZodSchema
+    ResetPasswordZodSchema,
+    UpdateUserProfileSchema
 }
 
 

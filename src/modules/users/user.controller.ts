@@ -170,6 +170,22 @@ const getMe = async (req: Request, res: Response) => {
   }
 };
 
+const UpdateProfile =async(req:Request,res:Response)=>{
+  const payload = req.body
+  const id = req.user?.id
+    try {
+        const user = await userService.UpdateProfile(id as string,payload);
+
+        res.status(200).json({
+            success : true,
+            message : "Profile Update successfully.",
+            data : user
+        })
+    } catch (error) {
+        console.log(error);
+    }
+}
+
 const logoutUser = async (req: Request, res: Response) => {
   try {
     res.clearCookie("accessToken", {
@@ -265,5 +281,6 @@ export const userController = {
     googleLogin,
     emailVerification,
     forgotPassword,
-    resetPassword
+    resetPassword,
+    UpdateProfile
 };

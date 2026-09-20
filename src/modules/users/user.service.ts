@@ -1,7 +1,7 @@
 import jwt, { SignOptions } from "jsonwebtoken";
 import config from "../../config";
 import { prisma } from "../../lib/prisma";
-import { IEmailVerification, IForgotPassword, IGoogleLoinPayload, ILoin, IResetPassword, Iuser, jwtPayload } from "./user.interface";
+import { IEmailVerification, IForgotPassword, IGoogleLoinPayload, ILoin, IResetPassword, IUpdateUserProfile, Iuser, jwtPayload } from "./user.interface";
 import bcrypt from "bcrypt";
 import { createToken } from "../../utils/token";
 import { TokenPayload } from "google-auth-library";
@@ -1624,6 +1624,21 @@ const resetPassword =async(payload:IResetPassword)=>{
 }
 
 
+const UpdateProfile =async(id:string,payload:IUpdateUserProfile)=>{
+  
+  const result = await prisma.user.update({
+    where: {
+      id
+    },
+    data: payload,
+    omit :{
+      password : true
+    }
+  });
+
+  return result;
+}
+
 export const userService = {
   createUserIntoDB,
   loginUserIntoDB,
@@ -1631,5 +1646,6 @@ export const userService = {
   googleLoin,
   emailVerification,
   forgotPassword,
-  resetPassword
+  resetPassword,
+  UpdateProfile
 };

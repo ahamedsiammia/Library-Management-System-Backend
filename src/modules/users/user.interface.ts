@@ -46,3 +46,11 @@ export interface IResetPassword {
 	otp : string,
 	newPassword : string
 }
+
+export interface IUpdateUserProfile {
+  name?: string;
+  roll?: number ;
+  instituteName?: string;
+  semester?: string;
+  shift?: string;
+}

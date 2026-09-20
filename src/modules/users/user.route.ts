@@ -2,6 +2,8 @@ import { Router } from "express";
 import { userController } from "./user.controller";
 import { validateRequest } from "../../middlewares/validateRequest";
 import { userValidation } from "./uservalidation";
+import { auth } from "../../middlewares/auth";
+import { Role } from "../../../generated/prisma/enums";
 
 const router = Router();
 
@@ -11,9 +13,11 @@ router.post("/email-verification", userController.emailVerification);
 
 router.post("/login",validateRequest(userValidation.userLoginZodSchema), userController.loginUser);
 
-router.get("/get", userController.getAllUser);
+router.get("/all-user",auth(Role.LIBRARIAN,Role.ADMIN),userController.getAllUser);
 
-router.get("/me", userController.getMe);
+router.patch("/update-profile",auth(Role.ADMIN,Role.LIBRARIAN,Role.USER),validateRequest(userValidation.UpdateUserProfileSchema),userController.UpdateProfile)
+
+router.get("/me",auth(Role.ADMIN,Role.LIBRARIAN,Role.USER),validateRequest(userValidation.UpdateUserProfileSchema), userController.getMe);
 
 router.post("/logout", userController.logoutUser);
 
