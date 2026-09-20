@@ -25,6 +25,37 @@ const createUser =async(req:Request,res:Response)=>{
     }
 };
 
+const emailVerification = async(req:Request,res:Response)=>{
+	const payload = req.body;
+
+	const result = await userService.emailVerification(payload)
+	
+	const { accessToken, refreshToken, user } = result;
+
+	res.cookie("accessToken", accessToken, {
+		httpOnly: true,
+		secure: false,
+		sameSite: "none",
+		maxAge: 1000 * 60 * 60 * 24, // 24 hour or 1 day
+	});
+	res.cookie("refreshToken", refreshToken, {
+		httpOnly: true,
+		secure: false,
+		sameSite: "none",
+		maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+	});
+
+	sendResponse(res, {
+		statusCode: 201,
+		success: true,
+		message: "User registered successfully",
+		data: {
+			accessToken,
+			refreshToken,
+			user,
+		},
+	});
+}
 
 const loginUser = async(req:Request,res:Response)=>{
     try {
@@ -198,11 +229,41 @@ const googleLogin =async(req: Request, res: Response) => {
 };
 
 
+const forgotPassword = async(req:Request,res:Response)=>{
+	const payload = req.body;
+
+	await userService.forgotPassword(payload)
+
+	sendResponse(res, {
+		statusCode: 200,
+		success: true,
+		message: `OTP send to this ${payload.email}  Email.`,
+		data: null,
+	});
+}
+
+
+const resetPassword =async(req:Request,res:Response)=>{
+	const payload = req.body;
+
+	 await userService.resetPassword(payload)
+
+	sendResponse(res, {
+		statusCode:200,
+		success: true,
+		message: "Password Change successfully",
+		data: null
+	});
+}
+
 export const userController = {
     createUser,
     loginUser,
     getAllUser,
     getMe,
     logoutUser,
-    googleLogin
+    googleLogin,
+    emailVerification,
+    forgotPassword,
+    resetPassword
 };
