@@ -9,6 +9,7 @@ import { prisma } from "./lib/prisma";
 import { sendResponse } from "./utils/sendResponse";
 import { bookingRouter } from "./modules/Bookings/booking.route";
 import { paymentRouter } from "./modules/payment/payment.route";
+import { adminRouter } from "./modules/Admin/admin.route";
 
 
 
@@ -53,6 +54,9 @@ app.use("/", BookRoutes)
 app.use("/booking",bookingRouter)
 
 app.use("/payment",paymentRouter)
+
+
+app.use("/admin",adminRouter)
 
 app.post("/aichat",POST);
 

@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { BookServices } from "./books.service";
+import { sendResponse } from "../../utils/sendResponse";
 
 const getAllBooks = async (req: Request, res: Response) => {
   try {
@@ -84,9 +85,35 @@ const updateBook = async (req: Request, res: Response) => {
     });
   }
 };
+
+const returnBook = async(req:Request,res:Response)=>{
+  try {
+    const {bookingId} = req.body;
+    const user = req.user
+    const returnBook = await BookServices.returnBook(user,bookingId as string)
+
+    sendResponse(res,{
+      success : true,
+      statusCode : 200,
+      message : "Your Book Return Successful",
+      data : returnBook
+    })
+    
+  } catch (error: any) {
+      sendResponse(res, {
+        success: false,
+        statusCode: 500,
+        message: error.message,
+        error: error,
+      });
+    }
+
+}
+
 export const BookControllers = {
   getAllBooks,
   createBook,
   getBookById,
-  updateBook
+  updateBook,
+  returnBook
 };

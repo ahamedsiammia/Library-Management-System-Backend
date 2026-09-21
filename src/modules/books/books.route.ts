@@ -15,5 +15,7 @@ router.post("/create-books", auth(Role.LIBRARIAN,Role.ADMIN) , BookControllers.c
 
 router.patch("/books/:id",auth(Role.LIBRARIAN,Role.ADMIN),validateRequest(BooksValidation.updateBookZodSchema), BookControllers.updateBook);
 
+router.post("/return-book",auth(Role.ADMIN,Role.USER,Role.LIBRARIAN),BookControllers.returnBook)
+
 
 export const BookRoutes = router;

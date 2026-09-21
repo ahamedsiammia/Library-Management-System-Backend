@@ -1,5 +1,7 @@
 import { Prisma } from "../../../generated/prisma/client";
 import { prisma } from "../../lib/prisma";
+import { InitiatePayment } from "../payment/InitiatePayment";
+import { IRequestUser } from "../users/user.interface";
 import { IBookQuery, ICreateBook, IUpdateBook } from "./books.interface";
 
 const getAllBooks = async (query: IBookQuery) => {
@@ -82,6 +84,7 @@ const getBookById = async (id: string) => {
   return result;
 };
 
+
 const updateBook = async (id: string, payload: IUpdateBook) => {
   const result = await prisma.books.update({
     where: { id },
@@ -91,9 +94,53 @@ const updateBook = async (id: string, payload: IUpdateBook) => {
   return result;
 };
 
+const returnBook = async (user:IRequestUser,bookingId: string) => {
+  const booking = await prisma.booking.findUnique({
+    where: { id: bookingId },
+  });
+
+  if (!booking) {
+    throw new Error("Booking Not Found");
+  }
+
+  if (!booking.dueDate) {
+    throw new Error("Due date not set for this booking");
+  }
+
+  const returnDate = new Date();
+  const dueDate = new Date(booking.dueDate);
+
+  let fineAmount = 0;
+
+  if (returnDate > dueDate) {
+    const diffTime = returnDate.getTime() - dueDate.getTime();
+    const overdueDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    fineAmount = overdueDays * 20;
+  }
+
+  if(fineAmount > 0){
+
+  const payment = await InitiatePayment(user , bookingId)
+
+  } else if(fineAmount === 0){
+      const result = await prisma.booking.update({
+    where: { id: bookingId },
+    data: {
+      status: "RETURNED",
+      returnDate: returnDate,
+      fineAmount: fineAmount,
+    },
+  });
+  return result;
+
+  }
+
+};
+
 export const BookServices = {
   getAllBooks,
   createBook,
   getBookById,
-  updateBook
+  updateBook,
+  returnBook
 };

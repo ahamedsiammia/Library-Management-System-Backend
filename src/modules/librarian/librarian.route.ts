@@ -11,17 +11,6 @@ router.get(
   LibrarianControllers.getDashboardStats
 );
 
-router.get(
-  "/users",
-  auth(Role.LIBRARIAN, Role.ADMIN),
-  LibrarianControllers.getAllUsers
-);
-
-router.patch(
-  "/users/:id/status",
-  auth(Role.LIBRARIAN),
-  LibrarianControllers.updateUserStatus
-);
 
 router.post(
   "/librarians",

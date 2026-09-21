@@ -27,9 +27,12 @@ export const auth = (...requierdRole: Role[]) => {
         : req.headers.authorization;
 
     if (!token) {
-      throw new Error(
-        "Your not Logged In . Please Logged in to access to this Resource.",
-      );
+      sendResponse(res,{
+        success : false,
+        statusCode : 500,
+        message : "Your Not Login!",
+        data : []
+      })
     }
     const verifyToken = await varifyToken(
       token,
