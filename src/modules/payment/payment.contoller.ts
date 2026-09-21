@@ -5,7 +5,8 @@ import { sendResponse } from "../../utils/sendResponse";
 import config from "../../config";
 
 const createPayment = async(req:Request,res:Response)=>{
-    const user = req.user;
+    try {
+            const user = req.user;
     const {bookingId} = req.body
     console.log(bookingId);
     const {sessionUrl,payment} = await paymentService.createPayment(user as IRequestUser,bookingId)
@@ -19,6 +20,14 @@ const createPayment = async(req:Request,res:Response)=>{
         paymentData : payment
       },
     });
+    
+    } catch (error:any) {
+        sendResponse(res,{
+            success : false,
+            statusCode : 500,
+            message : error.message,
+            error : error
+        })}
 };
 
 
@@ -51,7 +60,70 @@ console.log(response,"this is payment response");
 }
 
 
+const allPayments = async(req:Request ,res:Response)=>{
+    try {
+        const payments = await paymentService.allPayments();
+        sendResponse(res,{
+            success : true,
+            statusCode : 200,
+            message : "Payment Retrieved Successfully",
+            data : payments 
+        })
+    } catch (error:any) {
+        sendResponse(res,{
+            success : false,
+            statusCode : 500,
+            message : error.message,
+            error : error
+        })
+    }
+}
+
+const MyPayments = async(req:Request ,res:Response)=>{
+    try {
+        const userId = req.user?.id
+        const payments = await paymentService.MyPayments(userId as string);
+        sendResponse(res,{
+            success : true,
+            statusCode : 200,
+            message : "Payment Retrieved Successfully",
+            data : payments 
+        })
+    } catch (error:any) {
+        sendResponse(res,{
+            success : false,
+            statusCode : 500,
+            message : error.message,
+            error : error
+        })
+    }
+}
+
+const paymentDetails = async(req:Request ,res:Response)=>{
+    try {
+        const userId = req.user?.id
+        const {paymentId} = req.body
+        const payments = await paymentService.paymentDetails(userId as string,paymentId as string);
+        sendResponse(res,{
+            success : true,
+            statusCode : 200,
+            message : "Payment Retrieved Successfully",
+            data : payments 
+        })
+    } catch (error:any) {
+        sendResponse(res,{
+            success : false,
+            statusCode : 500,
+            message : error.message,
+            error : error
+        })
+    }
+}
+
 export const paymentController ={
     createPayment,
-    verifyPayment
+    verifyPayment,
+    allPayments,
+    MyPayments,
+    paymentDetails
 }

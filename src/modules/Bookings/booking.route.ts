@@ -11,7 +11,7 @@ router.post("/request",auth(Role.ADMIN,Role.LIBRARIAN,Role.USER),bookingControll
 
 router.get("/all-bookings",auth(Role.ADMIN,Role.LIBRARIAN),bookingController.allBookings);
 
-router.get("/booking-details",auth(Role.ADMIN,Role.LIBRARIAN),bookingController.bookingDetails);
+router.get("/booking-details",auth(Role.ADMIN,Role.LIBRARIAN,Role.USER),bookingController.bookingDetails);
 
 
 router.patch("/update-request",auth(Role.ADMIN,Role.LIBRARIAN),validateRequest(bookingValidation.UpdateBookingRequestZodSchema),bookingController.updateBooking)

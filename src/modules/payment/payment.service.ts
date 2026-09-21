@@ -22,7 +22,7 @@ const createPayment = async(user:IRequestUser,bookingId:string)=>{
     if(booking.userId !== user.id){
         throw new Error("This booking owner is't you")
     };
-    
+
     if(booking.status !== "APPROVED"){
         throw new Error("Your Booking Not APPROVED")
     };
@@ -102,8 +102,60 @@ console.log(response);
 }
 
 
+const allPayments = async()=>{
+    const payments = await prisma.payment.findMany();
+    
+    if(!payments){
+        throw new Error("Payment Not Found");
+    }
+
+    return payments
+}
+
+const MyPayments = async(userId : string)=>{
+    const myPayments = await prisma.payment.findMany({
+        where : {
+            userId : userId
+        }
+    });
+
+    if(!myPayments){
+        throw new Error("Payment Not Found")
+    };
+
+    return myPayments
+}
+
+const paymentDetails = async(userId:string,paymentId:string)=>{
+    const payment = await prisma.payment.findUnique({
+        where : {
+            id : paymentId
+        },
+        include : {
+            user : true,
+            booking : true
+        }
+    });
+
+    if(!payment){
+        throw new Error("Payment Not Found")
+    };
+
+    if(payment.user.role === "ADMIN" || payment.user.role === "LIBRARIAN"){
+        return payment
+    }
+
+    if(payment.user.id !== userId){
+        throw new Error("You Don't Owner this payment")
+    }
+
+    return payment
+}
 
 export const paymentService ={
     createPayment,
-    verifyPayment
+    verifyPayment,
+    allPayments,
+    MyPayments,
+    paymentDetails
 }
