@@ -8,7 +8,7 @@ const createPayment = async(req:Request,res:Response)=>{
     const user = req.user;
     const {bookingId} = req.body
     console.log(bookingId);
-    const {sessionUrl,createPayment} = await paymentService.createPayment(user as IRequestUser,bookingId)
+    const {sessionUrl,payment} = await paymentService.createPayment(user as IRequestUser,bookingId)
 
         sendResponse(res, {
       success: true,
@@ -16,7 +16,7 @@ const createPayment = async(req:Request,res:Response)=>{
       message: "Your Payment Create successfully",
       data : {
         sessionUrl,
-        paymentData : createPayment
+        paymentData : payment
       },
     });
 };

@@ -9,6 +9,9 @@ const createPayment = async(user:IRequestUser,bookingId:string)=>{
     const booking = await prisma.booking.findUnique({
         where : {
             id : bookingId
+        },
+        include : {
+            payments : true
         }
     });
 
@@ -19,7 +22,7 @@ const createPayment = async(user:IRequestUser,bookingId:string)=>{
     if(booking.userId !== user.id){
         throw new Error("This booking owner is't you")
     };
-
+    
     if(booking.status !== "APPROVED"){
         throw new Error("Your Booking Not APPROVED")
     };
@@ -45,37 +48,41 @@ const verifyPayment =async(bookingId : string,tranId: string,status:string,paylo
 
 console.log(response);
     if(response.data.status === "VALID"){
-        await prisma.booking.update({
-        where : {
-            id : bookingId
-        },
-        data :{
-            status : "ISSUED",
-            bookingDate : new Date()
-        }
-    })
+         const bookingDate = new Date();
+  const dueDate = new Date(bookingDate);
+  dueDate.setDate(dueDate.getDate() + 7); // bookingDate + 7 din
+
+  await prisma.booking.update({
+    where: {
+      id: bookingId
+    },
+    data: {
+      status: "ISSUED",
+      bookingDate: bookingDate,
+      dueDate: dueDate,
+      isPaid : true
+    }
+  });
 
     await prisma.payment.update({
         where : {
-            bookingId,
-            transactionId: tranId
+            bookingId
         },
         data : {
             status : "PAID",
             method : response.data.card_issuer,
-            paidAt : new Date(),
-            meta : payload 
+            paidAt : new Date()
         }
     })
     }else if(response.data.status === "FAILED"){
-    //             await prisma.bookings.update({
-    //     where : {
-    //         id : bookingId
-    //     },
-    //     data :{
-    //         stats : "COMPLETED"
-    //     }
-    // })
+                await prisma.booking.update({
+        where : {
+            id : bookingId
+        },
+        data :{
+            status : "REJECTED"
+        }
+    })
 
     await prisma.payment.update({
         where : {
