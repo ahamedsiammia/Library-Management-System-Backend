@@ -93,9 +93,25 @@ const updateBooking = async (payload: IUpdateBooking) => {
   return result;
 };
 
+const MyBookings = async(userId:string)=>{
+
+  const MyBookings = await prisma.booking.findMany({
+    where:{
+      userId : userId
+    }
+  });
+
+  if(!MyBookings){
+    throw new Error("Booking Not Found");
+  };
+
+  return MyBookings;
+}
+
 export const bookingService ={
     bookingRequest,
     allBookings,
     updateBooking,
-    bookingDetails
+    bookingDetails,
+    MyBookings
 }

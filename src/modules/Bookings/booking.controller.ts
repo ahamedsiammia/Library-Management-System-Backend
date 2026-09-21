@@ -92,9 +92,33 @@ const updateBooking = async (req: Request, res: Response) => {
   }
 };
 
+
+const MyBookings = async(req:Request,res:Response)=>{
+  try {
+    const userId = req.user?.id;
+    const bookings = await bookingService.MyBookings(userId as string);
+
+      sendResponse(res, {
+      success: true,
+      statusCode: 200,
+      message: "Booking Retrieved successful",
+      data: bookings,
+    });
+
+  } catch (error: any) {
+    sendResponse(res, {
+      success: false,
+      statusCode: 500,
+      message: error.message,
+      error: error,
+    });
+  }
+}
+
 export const bookingController ={
     bookingRequest,
     allBookings,
     updateBooking,
-    bookingDetails
+    bookingDetails,
+    MyBookings
 }
