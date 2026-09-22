@@ -47,3 +47,9 @@ enum PaymentType {
   FINE
 }
 
+
+enum NoticeVisibility {
+  PUBLIC
+  PRIVATE
+}
+

@@ -18,5 +18,7 @@ model User {
   updatedAt DateTime @updatedAt
   bookings Booking[]
   payments Payment[]
+  reviews Review[]
+  notices Notice[]
   @@map("users")
 }

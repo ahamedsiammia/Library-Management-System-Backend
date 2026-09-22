@@ -1,0 +1,17 @@
+model Review {
+  id      String @id @default(uuid())
+  userId  String
+  bookId  String
+
+  user User  @relation(fields: [userId], references: [id])
+  book Books @relation(fields: [bookId], references: [id])
+
+  rating  Int      
+  comment String?  @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, bookId]) 
+  @@map("reviews")
+}

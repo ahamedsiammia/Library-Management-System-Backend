@@ -10,6 +10,7 @@ import { sendResponse } from "./utils/sendResponse";
 import { bookingRouter } from "./modules/Bookings/booking.route";
 import { paymentRouter } from "./modules/payment/payment.route";
 import { adminRouter } from "./modules/Admin/admin.route";
+import { reviewRouter } from "./modules/review/review.route";
 
 
 
@@ -55,6 +56,7 @@ app.use("/booking",bookingRouter)
 
 app.use("/payment",paymentRouter)
 
+app.use("/review",reviewRouter)
 
 app.use("/admin",adminRouter)
 

@@ -32,7 +32,8 @@ model Books {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-   bookings Booking[]
-
+  bookings Booking[]
+  reviews Review[]
+  
   @@map("books")
 }

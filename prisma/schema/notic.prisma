@@ -1,0 +1,14 @@
+model Notice {
+  id          String           @id @default(uuid())
+  title       String
+  description String           @db.Text
+  visibility  NoticeVisibility @default(PUBLIC)
+  createdBy   String
+
+  creator User @relation(fields: [createdBy], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("notices")
+}
