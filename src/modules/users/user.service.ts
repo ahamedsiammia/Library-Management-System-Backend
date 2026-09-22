@@ -1,7 +1,7 @@
 import jwt, { SignOptions } from "jsonwebtoken";
 import config from "../../config";
 import { prisma } from "../../lib/prisma";
-import { IEmailVerification, IForgotPassword, IGoogleLoinPayload, ILoin, IResetPassword, IUpdateUserProfile, Iuser, jwtPayload } from "./user.interface";
+import { IEmailVerification, IForgotPassword, IGoogleLoinPayload, ILoin, IRequestUser, IResetPassword, IUpdateUserProfile, Iuser, jwtPayload } from "./user.interface";
 import bcrypt from "bcrypt";
 import { createToken } from "../../utils/token";
 import { TokenPayload } from "google-auth-library";
@@ -1639,6 +1639,35 @@ const UpdateProfile =async(id:string,payload:IUpdateUserProfile)=>{
   return result;
 }
 
+const setPassword = async (user: IRequestUser, newPassword: string) => {
+  const existingUser = await prisma.user.findUnique({
+    where: { id: user.id },
+  });
+
+  if (!existingUser) {
+    throw new Error("User Not Found");
+  }
+
+  if (existingUser.password) {
+    throw new Error("Password already set. Use change password instead");
+  }
+
+  const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+  const result = await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      password: hashedPassword,
+    },
+    omit : {
+      password : true
+    }
+  });
+
+  return result;
+};
+
+
 export const userService = {
   createUserIntoDB,
   loginUserIntoDB,
@@ -1647,5 +1676,6 @@ export const userService = {
   emailVerification,
   forgotPassword,
   resetPassword,
-  UpdateProfile
+  UpdateProfile,
+  setPassword
 };

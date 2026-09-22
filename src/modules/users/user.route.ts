@@ -28,4 +28,6 @@ router.post("/forgot-password",validateRequest(userValidation.ForgotPasswordZodS
 
 router.post("/reset-password",validateRequest(userValidation.ResetPasswordZodSchema),userController.resetPassword);
 
+router.patch("/set-password",auth(Role.ADMIN,Role.USER,Role.LIBRARIAN),validateRequest(userValidation.SetPasswordZodSchema),userController.setPassword);
+
 export const userRoute = router;

@@ -3,6 +3,7 @@ import { userService } from "./user.service";
 import { sendResponse } from "../../utils/sendResponse";
 import { varifyToken } from "../../utils/token";
 import { prisma } from "../../lib/prisma";
+import { IRequestUser } from "./user.interface";
 
 const createUser = async (req: Request, res: Response) => {
   const payload = req.body;
@@ -306,6 +307,30 @@ const resetPassword = async (req: Request, res: Response) => {
   }
 };
 
+const setPassword = async (req: Request, res: Response) => {
+  try {
+    const user = req.user;
+    const { newPassword } = req.body;
+
+    const result = await userService.setPassword(user as IRequestUser, newPassword as string);
+
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "New Password set successfully",
+      data: result,
+    });
+  } catch (error: any) {
+    sendResponse(res, {
+      success: false,
+      statusCode: 500,
+      message: error.message,
+      error: error,
+    });
+  }
+};
+
+
 export const userController = {
   createUser,
   loginUser,
@@ -317,4 +342,5 @@ export const userController = {
   forgotPassword,
   resetPassword,
   UpdateProfile,
+  setPassword
 };
