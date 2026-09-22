@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { BookServices } from "./books.service";
 import { sendResponse } from "../../utils/sendResponse";
+import { IRequestUser } from "../users/user.interface";
 
 const getAllBooks = async (req: Request, res: Response) => {
   try {
@@ -90,7 +91,7 @@ const returnBook = async(req:Request,res:Response)=>{
   try {
     const {bookingId} = req.body;
     const user = req.user
-    const returnBook = await BookServices.returnBook(user,bookingId as string)
+    const returnBook = await BookServices.returnBook(user as IRequestUser,bookingId as string)
 
     sendResponse(res,{
       success : true,

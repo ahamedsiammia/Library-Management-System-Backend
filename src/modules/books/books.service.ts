@@ -1,3 +1,4 @@
+import { number } from "zod";
 import { Prisma } from "../../../generated/prisma/client";
 import { prisma } from "../../lib/prisma";
 import { InitiatePayment } from "../payment/InitiatePayment";
@@ -103,6 +104,14 @@ const returnBook = async (user:IRequestUser,bookingId: string) => {
     throw new Error("Booking Not Found");
   }
 
+  if (booking.userId !== user.id) {
+  throw new Error("This booking is not yours");
+}
+
+if (booking.status !== "ISSUED") {
+  throw new Error("This book is not currently issued");
+}
+
   if (!booking.dueDate) {
     throw new Error("Due date not set for this booking");
   }
@@ -118,19 +127,36 @@ const returnBook = async (user:IRequestUser,bookingId: string) => {
     fineAmount = overdueDays * 20;
   }
 
-  if(fineAmount > 0){
-
+  if(fineAmount){
+    await prisma.booking.update({
+    where: { id: bookingId },
+    data: { fineAmount }
+  });
   const payment = await InitiatePayment(user , bookingId)
 
-  } else if(fineAmount === 0){
+  return {payment,message:"You pay Fine amount then return book"}
+
+  } else {
       const result = await prisma.booking.update({
     where: { id: bookingId },
     data: {
       status: "RETURNED",
       returnDate: returnDate,
-      fineAmount: fineAmount,
+      fineAmount: fineAmount, 
     },
+    include :{
+      book : true
+    }
   });
+
+  await prisma.books.update({
+    where:{
+      id : result.book.id
+    },
+    data : {
+      copiesAvailable : Number(result.book.copiesAvailable) + 1
+    }
+  })
   return result;
 
   }
