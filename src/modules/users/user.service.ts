@@ -1672,6 +1672,9 @@ const getMe = async(user : IRequestUser)=>{
   const findUser = await prisma.user.findUnique({
     where : {
       id : id
+    },
+    omit : {
+      password : true
     }
   });
 
