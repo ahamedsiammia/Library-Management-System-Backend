@@ -63,6 +63,7 @@ const updateNotice = async (req: Request, res: Response) => {
 
 
 const deleteNotice = async (req: Request, res: Response) => {
+    
   try {
     const user = req.user;
     const { id } = req.params;
