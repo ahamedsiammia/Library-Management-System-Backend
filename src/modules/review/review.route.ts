@@ -10,9 +10,9 @@ const router = Router();
 
 router.post("/create-review", auth(Role.ADMIN,Role.USER,Role.LIBRARIAN), validateRequest(createReviewSchema), reviewController.createReview);
 
-router.patch("/update-review",auth(Role.ADMIN,Role.USER,Role.LIBRARIAN),validateRequest(updateReviewSchema),reviewController.updateReview);
+router.patch("/update-review/:reviewId",auth(Role.ADMIN,Role.USER,Role.LIBRARIAN),validateRequest(updateReviewSchema),reviewController.updateReview);
 
-router.get("/book-review", reviewController.getReviewsByBookId);
+router.get("/book-review/:bookId", reviewController.getReviewsByBookId);
 
 router.delete("/delete-review/:reviewId", auth(Role.USER,Role.ADMIN,Role.LIBRARIAN), reviewController.deleteReview);
 

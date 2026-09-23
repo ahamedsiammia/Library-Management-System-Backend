@@ -17,7 +17,7 @@ router.get("/all-user",auth(Role.LIBRARIAN,Role.ADMIN),userController.getAllUser
 
 router.patch("/update-profile",auth(Role.ADMIN,Role.LIBRARIAN,Role.USER),validateRequest(userValidation.UpdateUserProfileSchema),userController.UpdateProfile)
 
-router.get("/me",auth(Role.ADMIN,Role.LIBRARIAN,Role.USER),validateRequest(userValidation.UpdateUserProfileSchema), userController.getMe);
+router.get("/me",auth(Role.ADMIN,Role.LIBRARIAN,Role.USER), userController.getMe);
 
 router.post("/logout", userController.logoutUser);
 

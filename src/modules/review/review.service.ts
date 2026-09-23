@@ -51,8 +51,8 @@ const createReview = async (
   return review;
 };
 
-const updateReview = async (user: IRequestUser, payload: IUpdateReview) => {
-  const { reviewId, ...updateData } = payload;
+const updateReview = async (user: IRequestUser, payload: IUpdateReview,reviewId : string) => {
+  const { ...updateData } = payload;
 
   const review = await prisma.review.findUnique({
     where: { id: reviewId },

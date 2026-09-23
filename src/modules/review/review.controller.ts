@@ -31,7 +31,8 @@ const createReview = async (req: Request, res: Response) => {
 const updateReview = async (req: Request, res: Response) => {
   try {
     const user = req.user;
-    const result = await reviewService.updateReview(user as IRequestUser, req.body);
+    const {reviewId} = req.params;
+    const result = await reviewService.updateReview(user as IRequestUser, req.body,reviewId as string);
 
     sendResponse(res,{
        success: true,
@@ -53,7 +54,7 @@ const updateReview = async (req: Request, res: Response) => {
 
 const getReviewsByBookId = async (req: Request, res: Response) => {
   try {
-    const { bookId } = req.body;
+    const { bookId } = req.params;
     const result = await reviewService.getReviewsByBookId(bookId as string, req.query);
 
     res.status(200).json({

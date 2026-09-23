@@ -7,7 +7,6 @@ export const createReviewSchema = z.object({
 });
 
 export const updateReviewSchema = z.object({
-  reviewId: z.string("Invalid review id"),
   rating: z.number().int().min(1).max(5).optional(),
   comment: z.string().trim().optional(),
 });

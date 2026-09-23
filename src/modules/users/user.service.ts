@@ -1667,6 +1667,21 @@ const setPassword = async (user: IRequestUser, newPassword: string) => {
   return result;
 };
 
+const getMe = async(user : IRequestUser)=>{
+  const {id} = user;
+  const findUser = await prisma.user.findUnique({
+    where : {
+      id : id
+    }
+  });
+
+  if(!findUser){
+    throw new Error("User not Found")
+  };
+
+  return findUser
+}
+
 
 export const userService = {
   createUserIntoDB,
@@ -1677,5 +1692,6 @@ export const userService = {
   forgotPassword,
   resetPassword,
   UpdateProfile,
-  setPassword
+  setPassword,
+  getMe
 };

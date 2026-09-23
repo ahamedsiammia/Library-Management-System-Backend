@@ -15,7 +15,7 @@ router.get("/all-payments",auth(Role.ADMIN,Role.LIBRARIAN),paymentController.all
 
 router.get("/my-payments",auth(Role.ADMIN,Role.LIBRARIAN,Role.USER),paymentController.allPayments);
 
-router.get("/payment-details",auth(Role.ADMIN,Role.USER,Role.LIBRARIAN),validateRequest(paymentValidation.paymentDetailsZodSchema) ,paymentController.paymentDetails)
+router.get("/payment-details/:paymentId",auth(Role.ADMIN,Role.USER,Role.LIBRARIAN),paymentController.paymentDetails)
 
 
 export const paymentRouter = router;

@@ -7,7 +7,7 @@ import { string } from "zod";
 const bookingRequest =async(req:Request,res:Response)=>{
     try {
             const  userId =req.user?.id;
-    const {bookId} = req.body;
+    const {bookId} = req.params;
     const payload ={userId,bookId} as ICreateBooking;
 
     const result = await bookingService.bookingRequest(payload)
@@ -51,7 +51,7 @@ const allBookings = async (req: Request, res: Response) => {
 
 const bookingDetails =async(req:Request,res:Response)=>{
     try {
-    const {bookingId} = req.body;
+    const {bookingId} = req.params;
 
     const result = await bookingService.bookingDetails(bookingId as string)
 
@@ -73,7 +73,8 @@ const bookingDetails =async(req:Request,res:Response)=>{
 
 const updateBooking = async (req: Request, res: Response) => {
   try {
-    const  payload  = req.body;
+    const {bookingId} = req.params;
+    const payload = {bookingId,...req.body}
     const result = await bookingService.updateBooking(payload);
 
     sendResponse(res, {

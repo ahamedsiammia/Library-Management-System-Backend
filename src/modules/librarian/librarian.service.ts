@@ -123,7 +123,7 @@ const createLibrarian = async (payload: ICreateLibrarian) => {
       instituteName,
       semester,
       shift,
-      role: Role.ADMIN,
+      role: Role.LIBRARIAN,
       activeStatus: ActiveStatus.ACTIVE,
     },
     omit: { password: true },

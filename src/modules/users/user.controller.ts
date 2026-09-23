@@ -129,53 +129,19 @@ const getAllUser = async (req: Request, res: Response) => {
 
 const getMe = async (req: Request, res: Response) => {
   try {
-    const token = req.cookies.accessToken
-      ? req.cookies.accessToken
-      : req.headers.authorization?.startsWith("Bearer")
-        ? req.headers.authorization?.split(" ")[1]
-        : req.headers.authorization;
+      const user = req.user;
+      if(!user){
+        throw new Error("This is not Login");
+      }
 
-    if (!token) {
-      return res.status(401).json({
-        success: false,
-        message: "Not authenticated",
-        data: null,
-      });
-    }
+      const result = await userService.getMe(user);
 
-    const verified = await varifyToken(
-      token,
-      process.env.JWT_ACCESS_SECRET as string,
-    );
-
-    if (!verified.success || !verified.data) {
-      return res.status(401).json({
-        success: false,
-        message: "Invalid or expired token",
-        data: null,
-      });
-    }
-
-    const { id } = verified.data;
-
-    const user = await prisma.user.findUnique({
-      where: { id },
-      omit: { password: true },
-    });
-
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found",
-        data: null,
-      });
-    }
-
-    return res.status(200).json({
-      success: true,
-      message: "User fetched successfully",
-      data: user,
-    });
+      sendResponse(res,{
+        success : true,
+        statusCode : 200,
+        message : "user Retrieved successful ",
+        data : result
+      })
   } catch (error: any) {
     return res.status(500).json({
       success: false,

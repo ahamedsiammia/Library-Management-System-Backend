@@ -11,6 +11,7 @@ import { bookingRouter } from "./modules/Bookings/booking.route";
 import { paymentRouter } from "./modules/payment/payment.route";
 import { adminRouter } from "./modules/Admin/admin.route";
 import { reviewRouter } from "./modules/review/review.route";
+import { noticeRouter } from "./modules/notice/notice.router";
 
 
 
@@ -50,7 +51,7 @@ app.use("/user", userRoute)
 
 app.use("/librarian", LibrarianRoutes)
 
-app.use("/", BookRoutes)
+app.use("/books", BookRoutes)
 
 app.use("/booking",bookingRouter)
 
@@ -59,6 +60,8 @@ app.use("/payment",paymentRouter)
 app.use("/review",reviewRouter)
 
 app.use("/admin",adminRouter)
+
+app.use("/notice",noticeRouter)
 
 app.post("/aichat",POST);
 

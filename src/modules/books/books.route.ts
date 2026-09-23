@@ -7,15 +7,15 @@ import { BooksValidation } from "./booksvalidation";
 
 const router = Router();
 
-router.get("/books", BookControllers.getAllBooks);
+router.get("/", BookControllers.getAllBooks);
 
-router.get("/books/:id",auth(Role.ADMIN,Role.USER,Role.LIBRARIAN), BookControllers.getBookById);
+router.get("/:id",auth(Role.ADMIN,Role.USER,Role.LIBRARIAN), BookControllers.getBookById);
 
 router.post("/create-books", auth(Role.LIBRARIAN,Role.ADMIN) , BookControllers.createBook);
 
-router.patch("/books/:id",auth(Role.LIBRARIAN,Role.ADMIN),validateRequest(BooksValidation.updateBookZodSchema), BookControllers.updateBook);
+router.patch("/:id",auth(Role.LIBRARIAN,Role.ADMIN),validateRequest(BooksValidation.updateBookZodSchema), BookControllers.updateBook);
 
-router.post("/return-book",auth(Role.ADMIN,Role.USER,Role.LIBRARIAN),BookControllers.returnBook)
+router.post("/return-book/:bookingId",auth(Role.ADMIN,Role.USER,Role.LIBRARIAN),BookControllers.returnBook)
 
 
 export const BookRoutes = router;

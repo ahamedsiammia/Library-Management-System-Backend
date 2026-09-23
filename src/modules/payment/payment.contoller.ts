@@ -460,7 +460,7 @@ const MyPayments = async (req: Request, res: Response) => {
 const paymentDetails = async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
-    const { paymentId } = req.body;
+    const { paymentId } = req.params;
     const payments = await paymentService.paymentDetails(
       userId as string,
       paymentId as string,

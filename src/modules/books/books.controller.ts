@@ -89,7 +89,7 @@ const updateBook = async (req: Request, res: Response) => {
 
 const returnBook = async(req:Request,res:Response)=>{
   try {
-    const {bookingId} = req.body;
+    const {bookingId} = req.params;
     const user = req.user
     const returnBook = await BookServices.returnBook(user as IRequestUser,bookingId as string)
 
