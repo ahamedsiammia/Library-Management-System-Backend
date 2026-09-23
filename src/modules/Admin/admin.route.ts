@@ -8,7 +8,7 @@ const router = Router();
 
 router.get("/all-librarian",auth(Role.ADMIN),adminController.AllLibrarian); 
 
-router.patch("/update-status",auth(Role.ADMIN),LibrarianControllers.updateUserStatus)
+router.patch("/update-status/:id",auth(Role.ADMIN),LibrarianControllers.updateUserStatus)
 
 
 export const adminRouter = router;

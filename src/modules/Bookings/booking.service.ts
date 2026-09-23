@@ -48,7 +48,11 @@ const bookingDetails = async(bookingId : string)=>{
             id : bookingId
         },
         include :{
-            user: true,
+            user:{
+              omit : {
+                password : true
+              }
+            },
             book : true
         }
     });

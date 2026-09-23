@@ -87,10 +87,10 @@ const getAllUsers = async (roleFilter?: string, search?: string) => {
   return users;
 };
 
-const updateUserStatus = async (userId: string, status: ActiveStatus) => {
+const updateUserStatus = async (userId: string, activeStatus: ActiveStatus) => {
   const user = await prisma.user.update({
     where: { id: userId },
-    data: { activeStatus: status },
+    data: { activeStatus: activeStatus },
     omit: { password: true },
   });
   return user;

@@ -37,8 +37,8 @@ const getAllUsers = async (req: Request, res: Response) => {
 const updateUserStatus = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { status } = req.body;
-    const data = await LibrarianServices.updateUserStatus(id as string, status);
+    const { activeStatus } = req.body;
+    const data = await LibrarianServices.updateUserStatus(id as string, activeStatus);
     sendResponse(res, {
       success: true,
       statusCode: 200,

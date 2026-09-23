@@ -855,7 +855,11 @@ const loginUserIntoDB = async(payload:ILoin)=>{
 }
 
 const getAllUser = async () => {
-  const user = await prisma.user.findMany();
+  const user = await prisma.user.findMany({
+    omit : {
+      password : true
+    }
+  });
   return { user };
 };
 

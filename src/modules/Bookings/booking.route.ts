@@ -13,7 +13,7 @@ router.get("/all-bookings",auth(Role.ADMIN,Role.LIBRARIAN),bookingController.all
 
 router.get("/booking-details/:bookingId",auth(Role.ADMIN,Role.LIBRARIAN,Role.USER),bookingController.bookingDetails);
 
-router.patch("/update-request/:bookingId",auth(Role.ADMIN,Role.LIBRARIAN),validateRequest(bookingValidation.UpdateBookingRequestZodSchema),bookingController.updateBooking)
+router.patch("/update-request/:bookingId",auth(Role.ADMIN,Role.LIBRARIAN,Role.USER),validateRequest(bookingValidation.UpdateBookingRequestZodSchema),bookingController.updateBooking)
 
 router.get("/my-bookings",auth(Role.ADMIN,Role.USER,Role.LIBRARIAN),bookingController.MyBookings)
 
