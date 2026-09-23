@@ -159,7 +159,6 @@ const deleteReview = async (user: IRequestUser, reviewId: string) => {
   return { message: "Review deleted successfully" };
 };
 
-
 export const reviewService = {
   createReview,
   updateReview,
