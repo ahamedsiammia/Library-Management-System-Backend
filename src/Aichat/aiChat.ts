@@ -104,7 +104,7 @@ Response Guidelines:
     const reply =
       data.candidates?.[0]?.content?.parts?.[0]?.text ||
       "কোনো রেসপন্স পাওয়া যায়নি।";
-
+    console.log(reply);
     return res.status(200).json({ reply });
   } catch (error: any) {
     console.error("Express Chat Controller Error:", error);

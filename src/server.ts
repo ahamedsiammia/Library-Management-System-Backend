@@ -28,4 +28,4 @@ async function main() {
 
 main();
 
-// export default app
+export default app
