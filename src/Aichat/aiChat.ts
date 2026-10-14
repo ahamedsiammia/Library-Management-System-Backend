@@ -1,6 +1,14 @@
 import { Request, Response } from "express";
 import config from "../config";
 
+const CANDIDATE_MODELS = [
+  "gemini-flash-lite-latest",
+  "gemini-flash-latest",
+  "gemini-2.5-flash-lite",
+  "gemini-3.5-flash-lite",
+  "gemini-3.8-flash",
+];
+
 export const POST = async (req: Request, res: Response) => {
   try {
     const apiKey = config.gemini_api_key;
@@ -23,10 +31,10 @@ export const POST = async (req: Request, res: Response) => {
       parts: [{ text: m.parts[0]?.text || "" }],
     }));
 
-const systemInstruction = {
-  parts: [
-    {
-      text: `You are Library Assistant, the official AI assistant of the Library Management System developed by Siam Ahamed (Full Stack Developer).
+    const systemInstruction = {
+      parts: [
+        {
+          text: `You are Library Assistant, the official AI assistant of the Library Management System developed by Siam Ahamed (Full Stack Developer).
 
 Your primary responsibility is to assist users with everything related to the Library Management System while also being able to answer general knowledge questions.
 
@@ -71,40 +79,55 @@ Response Guidelines:
 - If you don't know something or cannot access live system data, clearly tell the user instead of guessing.
 - Ask clarifying questions if the user's request is unclear.
 - Always prioritize accuracy and user experience.`,
-    },
-  ],
-};
-
-    // Direct REST Fetch to standard Gemini Flash Model (gemini-1.5-flash)
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          contents,
-          systemInstruction,
-          generationConfig: {
-            temperature: 0.7,
-          },
-        }),
-      }
-    );
+      ],
+    };
 
-    if (!response.ok) {
-      const errData = await response.json();
-      return res
-        .status(response.status)
-        .json({ error: errData.error?.message || "Google API Response Failed" });
+    let reply = "";
+    let lastError = "";
+
+    // Try candidate models with fallback for high reliability
+    for (const model of CANDIDATE_MODELS) {
+      try {
+        const response = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              contents,
+              systemInstruction,
+              generationConfig: {
+                temperature: 0.7,
+              },
+            }),
+          }
+        );
+
+        if (!response.ok) {
+          const errData = await response.json();
+          lastError = errData.error?.message || "Google API Response Failed";
+          continue; // try next candidate model
+        }
+
+        const data = await response.json();
+        reply =
+          data.candidates?.[0]?.content?.parts?.[0]?.text ||
+          "কোনো রেসপন্স পাওয়া যায়নি।";
+        break; // successfully got response!
+      } catch (err: any) {
+        lastError = err?.message || "Fetch failed";
+      }
     }
 
-    const data = await response.json();
-    const reply =
-      data.candidates?.[0]?.content?.parts?.[0]?.text ||
-      "কোনো রেসপন্স পাওয়া যায়নি।";
-    console.log(reply);
+    if (!reply) {
+      return res.status(500).json({
+        error: lastError || "AI মডেলের সাথে সংযোগ স্থাপন করা সম্ভব হয়নি।",
+      });
+    }
+
     return res.status(200).json({ reply });
   } catch (error: any) {
     console.error("Express Chat Controller Error:", error);
