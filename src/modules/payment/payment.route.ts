@@ -6,6 +6,7 @@ import { validateRequest } from "../../middlewares/validateRequest";
 import { paymentValidation } from "./paymentvalidation";
 
 const router = Router();
+router.get("/my-payments",auth(Role.ADMIN,Role.LIBRARIAN,Role.USER),paymentController.allPayments);
 
 router.post("/",paymentController.verifyPayment)
 
@@ -13,7 +14,6 @@ router.post("/create-payment",auth(Role.ADMIN,Role.USER,Role.LIBRARIAN),paymentC
 
 router.get("/all-payments",auth(Role.ADMIN,Role.LIBRARIAN),paymentController.allPayments);
 
-router.get("/my-payments",auth(Role.ADMIN,Role.LIBRARIAN,Role.USER),paymentController.allPayments);
 
 router.get("/payment-details/:paymentId",auth(Role.ADMIN,Role.USER,Role.LIBRARIAN),paymentController.paymentDetails)
 

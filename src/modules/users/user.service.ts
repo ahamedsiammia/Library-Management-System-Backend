@@ -10,6 +10,8 @@ import { ActiveStatus, authProvider, Role } from "../../../generated/prisma/enum
 import { redisClient } from "../../lib/redis";
 import crypto from "crypto"
 import { transporter } from "../../lib/nodemailer";
+import { UploadApiResponse } from "cloudinary";
+import cloudinary from "../../lib/cloudinary";
 
 const createUserIntoDB = async (payload: Iuser) => {
   const { name, email, password, instituteName, roll, semester, shift } =
@@ -1689,6 +1691,61 @@ const getMe = async(user : IRequestUser)=>{
   return findUser
 }
 
+const uploadProfileImage = async (buffer: Buffer, userId: string) => {
+  console.log(userId,"this is login user");
+  const currentUser = await prisma.user.findUnique({
+    where : {
+      id : userId
+    },
+    select : {
+      imagePublicId : true,
+      imageUrl : true
+    }
+  });
+
+  const result = await new Promise<UploadApiResponse>((resolve, reject) => {
+    cloudinary.uploader
+      .upload_stream(
+        {
+          resource_type: "auto",
+        },
+        (error, result) => {
+          if (error) {
+            reject(error);
+          } else {
+            if(!result){
+              throw new Error("Result not found")
+            }
+            resolve(result);
+          }
+        },
+      )
+      .end(buffer);
+  });
+
+  // Cloudinary upload শেষ হওয়ার পরে এখানে আসবে
+  const updatedUser = await prisma.user.update({
+    where: {
+      id: userId,
+    },
+    data: {
+      imageUrl: result.secure_url,
+      imagePublicId: result.public_id,
+    },
+    omit: {
+      password: true,
+    },
+  });
+
+  if(currentUser?.imagePublicId && currentUser.imageUrl){
+   await cloudinary.uploader.destroy(currentUser.imagePublicId,{
+      invalidate : true
+    })
+  }
+
+  return updatedUser;
+};
+
 
 export const userService = {
   createUserIntoDB,
@@ -1700,5 +1757,6 @@ export const userService = {
   resetPassword,
   UpdateProfile,
   setPassword,
-  getMe
+  getMe,
+  uploadProfileImage
 };

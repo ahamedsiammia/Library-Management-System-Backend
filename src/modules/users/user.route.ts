@@ -4,6 +4,7 @@ import { validateRequest } from "../../middlewares/validateRequest";
 import { userValidation } from "./uservalidation";
 import { auth } from "../../middlewares/auth";
 import { Role } from "../../../generated/prisma/enums";
+import upload from "../../lib/multer";
 
 const router = Router();
 
@@ -29,5 +30,8 @@ router.post("/forgot-password",validateRequest(userValidation.ForgotPasswordZodS
 router.post("/reset-password",validateRequest(userValidation.ResetPasswordZodSchema),userController.resetPassword);
 
 router.patch("/set-password",auth(Role.ADMIN,Role.USER,Role.LIBRARIAN),validateRequest(userValidation.SetPasswordZodSchema),userController.setPassword);
+
+router.patch("/profile-image",upload.single("profileImage"),auth(Role.ADMIN,Role.LIBRARIAN,Role.USER),userController.uploadProfileImage)
+
 
 export const userRoute = router;

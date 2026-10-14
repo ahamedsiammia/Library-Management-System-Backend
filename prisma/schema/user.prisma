@@ -13,6 +13,8 @@ model User {
   authProvider       authProvider @default(CREDENTIAL)
   googleId           String?      @unique
   needPasswordChange Boolean      @default(false)
+  imageUrl           String       @default("")
+  imagePublicId      String       @default("")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

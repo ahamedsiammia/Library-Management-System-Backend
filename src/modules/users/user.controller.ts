@@ -221,7 +221,7 @@ const googleLogin = async (req: Request, res: Response) => {
   sendResponse(res, {
     statusCode: 201,
     success: true,
-    message: "Patient registered successfully",
+    message: "User registered successfully",
     data: {
       accessToken,
       refreshToken,
@@ -297,6 +297,21 @@ const setPassword = async (req: Request, res: Response) => {
 };
 
 
+const uploadProfileImage = async(req:Request,res:Response)=>{
+
+	const userId = req.user?.id
+
+	const result = await userService.uploadProfileImage(req.file?.buffer as Buffer,userId as string)
+	sendResponse(res, {
+		statusCode: 200,
+		success: true,
+		message: "Profile Image Upload successfully",
+		data: result
+	});
+};
+
+
+
 export const userController = {
   createUser,
   loginUser,
@@ -308,5 +323,6 @@ export const userController = {
   forgotPassword,
   resetPassword,
   UpdateProfile,
-  setPassword
+  setPassword,
+  uploadProfileImage
 };

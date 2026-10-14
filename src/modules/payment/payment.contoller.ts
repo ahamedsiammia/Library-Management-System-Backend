@@ -10,7 +10,6 @@ const createPayment = async (req: Request, res: Response) => {
   try {
     const user = req.user;
     const { bookingId } = req.body;
-    console.log(bookingId);
     const { sessionUrl, payment } = await paymentService.createPayment(
       user as IRequestUser,
       bookingId,
@@ -401,7 +400,7 @@ const verifyPayment = async (req: Request, res: Response) => {
   `,
       });
 
-      return res.redirect(`https://siamahamed.netlify.app`);
+      return res.redirect(`http://localhost:3000/payment-success`);
     } else if (response === "fail") {
       return res.redirect(
         "https://www.memberstack.com/webflow/failed-payment-page?utm_source=Pinterest&utm_medium=organic",
@@ -440,6 +439,8 @@ const allPayments = async (req: Request, res: Response) => {
 const MyPayments = async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
+      console.log("Received userId:", userId);
+
     const payments = await paymentService.MyPayments(userId as string);
     sendResponse(res, {
       success: true,

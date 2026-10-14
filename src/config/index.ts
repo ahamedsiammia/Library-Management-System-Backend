@@ -28,5 +28,8 @@ export default {
 
     store_id : process.env.STORE_ID,
     store_passwd :process.env.STORE_PASSWORD,
-    local_app_url :process.env.LOCAL_APP_URL
+    local_app_url :process.env.LOCAL_APP_URL,
+    	cloudinary_cloud_name : process.env.CLOUDINARY_CLOUD_NAME,
+	cloudinary_api_key : process.env.CLOUDINARY_API_KEY,
+	cloudinary_api_secret : process.env.CLOUDINARY_API_SECRET,
 }

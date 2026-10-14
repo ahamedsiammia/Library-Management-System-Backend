@@ -257,9 +257,10 @@ const allPayments = async () => {
 };
 
 const MyPayments = async (userId: string) => {
+  console.log("Received userId:", userId);
   const myPayments = await prisma.payment.findMany({
     where: {
-      userId: userId,
+      userId : userId
     },
   });
 
