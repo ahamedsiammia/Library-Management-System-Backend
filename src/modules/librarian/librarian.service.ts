@@ -27,7 +27,7 @@ const getDashboardStats = async () => {
   });
 
   const totalLibrarians = await prisma.user.count({
-    where: { role: Role.ADMIN },
+    where: { role: { in: [Role.LIBRARIAN, Role.ADMIN] } },
   });
 
   const totalBooks = await prisma.books.count();

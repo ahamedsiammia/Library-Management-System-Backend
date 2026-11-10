@@ -17,29 +17,15 @@ import { noticeRouter } from "./modules/notice/notice.router";
 
 const app : Application = express();
 
-// const allowedOrigins = [
-//   process.env.APP_URL,
-//   process.env.PRODUCTION_URL,
-//   "http://localhost:3000",
-// ];
-
-// app.use(
-//   cors({
-//     origin(origin, callback) {
-//       // Postman বা server-to-server request-এর জন্য
-//       if (!origin) return callback(null, true);
-
-//       if (allowedOrigins.includes(origin)) {
-//         return callback(null, true);
-//       }
-
-//       return callback(new Error("Not allowed by CORS"));
-//     },
-//     credentials: true,
-//   })
-// );
-
-app.use(cors());
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // allow all origins reflectively for flexible dev and production
+      callback(null, true);
+    },
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({extended : true}));

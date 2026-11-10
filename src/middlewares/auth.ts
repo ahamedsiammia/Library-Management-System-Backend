@@ -20,75 +20,86 @@ declare global {
 
 export const auth = (...requierdRole: Role[]) => {
   return async (req: Request, res: Response, next: NextFunction) => {
-    const token = req.cookies.accessToken
-      ? req.cookies.accessToken
-      : req.headers.authorization?.startsWith("Bearer")
-        ? req.headers.authorization?.split(" ")[1]
-        : req.headers.authorization;
+    try {
+      const token = req.cookies?.accessToken
+        ? req.cookies.accessToken
+        : req.headers.authorization?.startsWith("Bearer")
+          ? req.headers.authorization?.split(" ")[1]
+          : req.headers.authorization;
 
-    if (!token) {
-      sendResponse(res,{
-        success : false,
-        statusCode : 500,
-        message : "Your Not Login!",
-        data : []
-      })
-    }
-    const verifyToken = await varifyToken(
-      token,
-      process.env.JWT_ACCESS_SECRET as string,
-    );
+      if (!token) {
+        return sendResponse(res, {
+          success: false,
+          statusCode: 401,
+          message: "You are not logged in!",
+          data: [],
+        });
+      }
 
-    // console.log(verifyToken);
+      const verifyToken = await varifyToken(
+        token,
+        process.env.JWT_ACCESS_SECRET as string,
+      );
 
-    if (!verifyToken.success && verifyToken.data !== undefined) {
-      throw new Error(verifyToken.message);
-    }
+      if (!verifyToken.success || !verifyToken.data) {
+        return sendResponse(res, {
+          success: false,
+          statusCode: 401,
+          message: verifyToken.message || "Invalid or expired token!",
+          data: [],
+        });
+      }
 
-    const { name, id, instituteName, shift, role, roll } = verifyToken.data!;
+      const { name, id, role, roll } = verifyToken.data;
 
-    if (!requierdRole.includes(role as Role)) {
+      if (requierdRole.length > 0 && !requierdRole.includes(role as Role)) {
+        return sendResponse(res, {
+          success: false,
+          statusCode: 403,
+          message: "You don't have access to this route",
+          data: [],
+        });
+      }
+
+      const user = await prisma.user.findUnique({
+        where: {
+          id,
+        },
+      });
+
+      if (!user) {
+        return sendResponse(res, {
+          success: false,
+          statusCode: 404,
+          message: "User does not exist",
+          data: [],
+        });
+      }
+
+      if (user.activeStatus === "BLOCKED") {
+        return sendResponse(res, {
+          success: false,
+          statusCode: 403,
+          message: "Your account has been blocked. Please contact support.",
+          data: [],
+        });
+      }
+
+      req.user = {
+        id: user.id,
+        name: user.name,
+        role: user.role,
+        roll: user.roll ?? 0,
+      };
+
+      next();
+    } catch (error: any) {
       return sendResponse(res, {
         success: false,
-        statusCode: 403,
-        message: "You Have don't access For Route",
+        statusCode: 500,
+        message: error.message || "Internal server error during authentication",
         data: [],
       });
     }
-
-    const user = await prisma.user.findUnique({
-      where: {
-        id,
-        roll,
-        role: role as Role,
-      },
-    });
-
-    if (!user) {
-      sendResponse(res, {
-        success: false,
-        statusCode: 404,
-        message: "User Not Exist",
-        data: [],
-      });
-    }
-
-    if (user?.activeStatus === "BLOCKED") {
-      sendResponse(res, {
-        success: false,
-        statusCode: 404,
-        message: "Your account has been blocked. please contact support.",
-        data: [],
-      });
-    }
-
-    req.user = {
-      id: id as string,
-      name: name,
-      role: role as Role,
-      roll : roll as number,
-    };
-
-    next();
   };
 };

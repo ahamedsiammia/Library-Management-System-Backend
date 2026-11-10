@@ -2,16 +2,16 @@ import { Request, Response } from "express";
 import config from "../config";
 
 const CANDIDATE_MODELS = [
-  "gemini-flash-lite-latest",
-  "gemini-flash-latest",
-  "gemini-2.5-flash-lite",
-  "gemini-3.5-flash-lite",
-  "gemini-3.8-flash",
+  "gemini-2.0-flash",
+  "gemini-1.5-flash",
+  "gemini-1.5-flash-8b",
+  "gemini-1.5-pro",
+  "gemini-2.5-flash"
 ];
 
 export const POST = async (req: Request, res: Response) => {
   try {
-    const apiKey = config.gemini_api_key;
+    const apiKey = config.gemini_api_key?.trim();
 
     if (!apiKey) {
       return res.status(500).json({
@@ -25,11 +25,31 @@ export const POST = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "Invalid request payload." });
     }
 
-    // Convert messages for Gemini API
-    const contents = messages.map((m: any) => ({
-      role: m.role === "user" ? "user" : "model",
-      parts: [{ text: m.parts[0]?.text || "" }],
-    }));
+    // Convert and sanitize messages for Gemini API
+    const rawContents: { role: "user" | "model"; parts: [{ text: string }] }[] = [];
+    for (const m of messages) {
+      if (m.isError) continue;
+      const text = m.parts?.[0]?.text?.trim();
+      if (!text) continue;
+      const role = m.role === "user" ? "user" : "model";
+      const last = rawContents[rawContents.length - 1];
+      if (last && last.role === role) {
+        last.parts[0].text += `\n${text}`;
+      } else {
+        rawContents.push({ role, parts: [{ text }] });
+      }
+    }
+
+    // Ensure the conversation starts with a user turn
+    while (rawContents.length > 0 && rawContents[0]?.role !== "user") {
+      rawContents.shift();
+    }
+
+    if (rawContents.length === 0) {
+      return res.status(400).json({ error: "No valid user message found." });
+    }
+
+    const contents = rawContents;
 
     const systemInstruction = {
       parts: [

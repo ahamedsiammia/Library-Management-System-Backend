@@ -9,22 +9,31 @@ async function main() {
     try {
         await prisma.$connect();
         console.log("Connected to The Database Successfully");
-        await redisClient.connect();
-		console.log("Redis connect Successfully");
 
-		await transporter.verify();
-		console.log("NodeMailer Connected Successfully");
+        try {
+            await redisClient.connect();
+            console.log("Redis connected Successfully");
+        } catch (redisError: any) {
+            console.warn("⚠️ Warning: Redis connection failed:", redisError?.message || redisError);
+        }
 
-        
-    app.listen(config.port,()=>{
-        console.log(`server on running port ${config.port}`);
-    })
+        try {
+            await transporter.verify();
+            console.log("NodeMailer Connected Successfully");
+        } catch (mailError: any) {
+            console.warn("⚠️ Warning: NodeMailer connection failed:", mailError?.message || mailError);
+        }
+
+        const port = Number(config.port) || 5000;
+        app.listen(port, () => {
+            console.log(`Server is running on port ${port}`);
+        });
     } catch (error) {
-        console.log("Error starting the server",error);
+        console.log("Error starting the server", error);
         await prisma.$disconnect();
         process.exit(1);
     }
-};
+}
 
 main();
 

@@ -1,5 +1,6 @@
 import { number } from "zod";
 import { Prisma } from "../../../generated/prisma/client";
+import { Role } from "../../../generated/prisma/enums";
 import { prisma } from "../../lib/prisma";
 import { InitiatePayment } from "../payment/InitiatePayment";
 import { IRequestUser } from "../users/user.interface";
@@ -104,9 +105,13 @@ const returnBook = async (user:IRequestUser,bookingId: string) => {
     throw new Error("Booking Not Found");
   }
 
-  if (booking.userId !== user.id) {
-  throw new Error("This booking is not yours");
-}
+  if (
+    booking.userId !== user.id &&
+    user.role !== Role.ADMIN &&
+    user.role !== Role.LIBRARIAN
+  ) {
+    throw new Error("This booking is not yours");
+  }
 
 if (booking.status !== "ISSUED") {
   throw new Error("This book is not currently issued");

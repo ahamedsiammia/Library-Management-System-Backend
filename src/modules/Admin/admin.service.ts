@@ -1,21 +1,21 @@
-import { prisma } from "../../lib/prisma"
+import { prisma } from "../../lib/prisma";
 
-const AllLibrarian =async()=>{
-    const librarian = await prisma.user.findMany({
-        where : {
-            role : "LIBRARIAN"
-        }
-    });
+const AllLibrarian = async () => {
+  const librarian = await prisma.user.findMany({
+    where: {
+      role: "LIBRARIAN",
+    },
+    omit: {
+      password: true,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
 
-    if(!librarian){
-        throw new Error("Librarian")
-    };
-
-    return librarian
+  return librarian;
 };
 
-
 export const adminService = {
-    AllLibrarian
-}
-
+  AllLibrarian,
+};

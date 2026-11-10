@@ -11,10 +11,9 @@ router.get(
   LibrarianControllers.getDashboardStats
 );
 
-
 router.post(
   "/librarians",
-  auth(Role.LIBRARIAN),
+  auth(Role.LIBRARIAN, Role.ADMIN),
   LibrarianControllers.createLibrarian
 );
 
@@ -26,24 +25,14 @@ router.get(
 
 router.patch(
   "/settings",
-  auth(Role.LIBRARIAN),
+  auth(Role.LIBRARIAN, Role.ADMIN),
   LibrarianControllers.updateSystemSettings
 );
 
 router.get(
   "/logs",
-  auth(Role.LIBRARIAN),
+  auth(Role.LIBRARIAN, Role.ADMIN),
   LibrarianControllers.getActivityLogs
 );
-
-
-//// This is My code of librarian 
-
-
-
-
-
-
-
 
 export const LibrarianRoutes = router;

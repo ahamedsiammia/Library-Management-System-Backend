@@ -400,7 +400,7 @@ const verifyPayment = async (req: Request, res: Response) => {
   `,
       });
 
-      return res.redirect(`http://localhost:3000/payment-success`);
+      return res.redirect(`https://library-management-system-dusky-one-43.vercel.app/payment-success`);
     } else if (response === "fail") {
       return res.redirect(
         "https://www.memberstack.com/webflow/failed-payment-page?utm_source=Pinterest&utm_medium=organic",
