@@ -2,11 +2,10 @@ import { Request, Response } from "express";
 import config from "../config";
 
 const CANDIDATE_MODELS = [
-  "gemini-2.0-flash",
-  "gemini-1.5-flash",
-  "gemini-1.5-flash-8b",
-  "gemini-1.5-pro",
-  "gemini-2.5-flash"
+  "gemini-3.5-flash",      // primary – fast & reliable
+  "gemini-3.8-flash",      // latest flagship flash
+  "gemini-3.7-flash",      // fallback
+  "gemini-3.5-flash-lite", // lightweight fallback
 ];
 
 export const POST = async (req: Request, res: Response) => {
@@ -127,8 +126,27 @@ Response Guidelines:
         );
 
         if (!response.ok) {
-          const errData = await response.json();
-          lastError = errData.error?.message || "Google API Response Failed";
+          const errData = await response.json().catch(() => ({}));
+          const code = response.status;
+          lastError = errData.error?.message || `Google API ${code}`;
+
+          // For 503 (overloaded) or 429 (rate limit), retry once after a short delay
+          if (code === 503 || code === 429) {
+            await new Promise((r) => setTimeout(r, 1500));
+            const retry = await fetch(
+              `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ contents, systemInstruction, generationConfig: { temperature: 0.7 } }),
+              }
+            );
+            if (retry.ok) {
+              const retryData = await retry.json();
+              reply = retryData.candidates?.[0]?.content?.parts?.[0]?.text || "";
+              if (reply) break;
+            }
+          }
           continue; // try next candidate model
         }
 
