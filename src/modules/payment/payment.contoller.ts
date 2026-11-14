@@ -10,9 +10,22 @@ const createPayment = async (req: Request, res: Response) => {
   try {
     const user = req.user;
     const { bookingId } = req.body;
+
+    let clientUrl: string | undefined = undefined;
+    if (req.body?.clientUrl) {
+      clientUrl = req.body.clientUrl;
+    } else if (req.headers.origin) {
+      clientUrl = req.headers.origin as string;
+    } else if (req.headers.referer) {
+      try {
+        clientUrl = new URL(req.headers.referer as string).origin;
+      } catch {}
+    }
+
     const { sessionUrl, payment } = await paymentService.createPayment(
       user as IRequestUser,
       bookingId,
+      clientUrl,
     );
 
     sendResponse(res, {
@@ -35,38 +48,75 @@ const createPayment = async (req: Request, res: Response) => {
 };
 
 const verifyPayment = async (req: Request, res: Response) => {
+  const payload = req.body || {};
+  const query = req.query || {};
+
+  const bookingId =
+    (query.bookingId as string) || payload.value_a || payload.bookingId || "";
+  const tranId =
+    (query.tranId as string) ||
+    payload.tran_id ||
+    payload.value_c ||
+    payload.tranId ||
+    "";
+  const rawStatus = (query.status as string) || payload.status || "";
+  const clientUrl =
+    (query.clientUrl as string) || payload.value_b || payload.clientUrl;
+
+  // Determine client frontend redirect URL
+  let baseUrl = clientUrl;
+  if (!baseUrl) {
+    if (req.headers.origin) {
+      baseUrl = req.headers.origin as string;
+    } else if (req.headers.referer) {
+      try {
+        baseUrl = new URL(req.headers.referer as string).origin;
+      } catch {}
+    }
+  }
+  if (!baseUrl) {
+    baseUrl = config.app_url || "http://localhost:3000";
+  }
+  const cleanBaseUrl = baseUrl.replace(/\/$/, "");
+
   try {
-    const { bookingId, tranId, status } = req.query;
-    const payload = req.body;
-
-    // console.log("form verify payment ",req.body,bookingId,tranId,status);
-
     const response = await paymentService.verifyPayment(
-      bookingId as string,
-      tranId as string,
-      status as string,
+      bookingId,
+      tranId,
+      rawStatus,
       payload,
     );
     console.log(response, "this is payment response");
     if (response === "success") {
-      const payment = await prisma.payment.findUnique({
-        where: {
-          transactionId: tranId as string,
-        },
-        include: {
-          user: true,
-        },
-      });
+      let payment = null;
+      if (tranId) {
+        payment = await prisma.payment.findUnique({
+          where: {
+            transactionId: tranId,
+          },
+          include: {
+            user: true,
+          },
+        });
+      }
+      if (!payment && bookingId) {
+        payment = await prisma.payment.findFirst({
+          where: { bookingId },
+          include: { user: true },
+          orderBy: { createdAt: "desc" },
+        });
+      }
 
       if (!payment) {
         throw new Error("Payment not Found");
       }
 
-      await transporter.sendMail({
-        from:config.email_sender,
-        to: payment?.user?.email,
-        subject: "Payment Successful - Library Management System",
-        html: `
+      try {
+        await transporter.sendMail({
+          from: config.email_sender,
+          to: payment?.user?.email,
+          subject: "Payment Successful - Library Management System",
+          html: `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -398,22 +448,30 @@ const verifyPayment = async (req: Request, res: Response) => {
 </body>
 </html>
   `,
-      });
+        });
+      } catch (mailErr) {
+        console.warn("Mail send warning:", mailErr);
+      }
 
-      return res.redirect(`https://library-management-system-dusky-one-43.vercel.app/payment-success`);
-    } else if (response === "fail") {
       return res.redirect(
-        "https://www.memberstack.com/webflow/failed-payment-page?utm_source=Pinterest&utm_medium=organic",
+        `${cleanBaseUrl}/payment-success?bookingId=${bookingId || ""}&tranId=${tranId || ""}`
       );
-    } else if (response === "cancel") res.redirect("/payment/cancel");
+    } else if (response === "cancel") {
+      return res.redirect(
+        `${cleanBaseUrl}/payment-cancel?bookingId=${bookingId || ""}&tranId=${tranId || ""}`
+      );
+    } else {
+      return res.redirect(
+        `${cleanBaseUrl}/payment-cancel?bookingId=${bookingId || ""}&tranId=${tranId || ""}&status=failed`
+      );
+    }
   } catch (error: any) {
-    sendResponse(res, {
-      success: false,
-      statusCode: 500,
-      message: error.message,
-      data: [],
-      error: { error },
-    });
+    console.error("verifyPayment error:", error);
+    return res.redirect(
+      `${cleanBaseUrl}/payment-cancel?bookingId=${bookingId || ""}&tranId=${tranId || ""}&error=${encodeURIComponent(
+        error.message || "Payment verification failed"
+      )}`
+    );
   }
 };
 

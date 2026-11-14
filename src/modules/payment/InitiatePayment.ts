@@ -9,7 +9,11 @@ const generateTransactionId = (): string => {
   return `LMS-${randomUUID().replace(/-/g, "").slice(0, 12).toUpperCase()}`;
 };
 
-export const InitiatePayment = async (user: IRequestUser, bookingId: string) => {
+export const InitiatePayment = async (
+  user: IRequestUser,
+  bookingId: string,
+  clientUrl?: string,
+) => {
   const booking = await prisma.booking.findUnique({
     where: { id: bookingId },
     include: { user: true },
@@ -41,19 +45,32 @@ export const InitiatePayment = async (user: IRequestUser, bookingId: string) => 
 
   const tranId = generateTransactionId();
 
+  // If client is running locally (e.g. localhost:3000), backend callback must also be local (localhost:5000)
+  const isLocalClient =
+    clientUrl && (clientUrl.includes("localhost") || clientUrl.includes("127.0.0.1"));
+  const backendBase = isLocalClient
+    ? `http://localhost:${config.port || 5000}`
+    : config.local_app_url?.replace(/\/$/, "") || `http://localhost:${config.port || 5000}`;
+
+  const clientParam = clientUrl ? `&clientUrl=${encodeURIComponent(clientUrl)}` : "";
+
   const paymentPayload = {
     store_id: config.store_id,
     store_passwd: config.store_passwd,
     total_amount: totalAmount,
     currency: "BDT",
     tran_id: tranId,
-    success_url: `${config.local_app_url}/payment?bookingId=${bookingId}&tranId=${tranId}&status=success`,
-    fail_url: `${config.local_app_url}/payment?bookingId=${bookingId}&tranId=${tranId}&status=fail`,
-    cancel_url: `${config.local_app_url}/payment?bookingId=${bookingId}&tranId=${tranId}&status=cancel`,
+    success_url: `${backendBase}/payment?bookingId=${bookingId}&tranId=${tranId}&status=success${clientParam}`,
+    fail_url: `${backendBase}/payment?bookingId=${bookingId}&tranId=${tranId}&status=fail${clientParam}`,
+    cancel_url: `${backendBase}/payment?bookingId=${bookingId}&tranId=${tranId}&status=cancel${clientParam}`,
     cus_name: user?.name,
     cus_email: booking.user.email,
     cus_postcode: "1000",
     cus_country: "Bangladesh",
+    value_a: bookingId,
+    value_b: clientUrl || "",
+    value_c: tranId,
+    value_d: user?.id || "",
   };
 
   const response = await axios.post(

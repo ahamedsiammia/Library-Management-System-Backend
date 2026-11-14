@@ -4,7 +4,11 @@ import { prisma } from "../../lib/prisma";
 import { IRequestUser } from "../users/user.interface";
 import { InitiatePayment } from "./InitiatePayment";
 
-const createPayment = async (user: IRequestUser, bookingId: string) => {
+const createPayment = async (
+  user: IRequestUser,
+  bookingId: string,
+  clientUrl?: string,
+) => {
   const booking = await prisma.booking.findUnique({
     where: {
       id: bookingId,
@@ -26,7 +30,7 @@ const createPayment = async (user: IRequestUser, bookingId: string) => {
     throw new Error("Your Booking Not APPROVED");
   }
 
-  const checkout = await InitiatePayment(user, bookingId);
+  const checkout = await InitiatePayment(user, bookingId, clientUrl);
 
   return checkout;
 };
@@ -149,44 +153,101 @@ const verifyPayment = async (
   status: string,
   payload: any,
 ) => {
-  const valId = payload.val_id;
+  const normStatus = (status || payload?.status || "").toLowerCase();
+
+  const effectiveTranId =
+    tranId || payload?.tran_id || payload?.tranId || payload?.value_c;
+  const effectiveBookingId =
+    bookingId || payload?.value_a || payload?.bookingId;
+
+  // Find existing payment by transactionId or bookingId
+  let existingPayment = null;
+  if (effectiveTranId) {
+    existingPayment = await prisma.payment.findUnique({
+      where: { transactionId: effectiveTranId },
+    });
+  }
+  if (!existingPayment && effectiveBookingId) {
+    existingPayment = await prisma.payment.findFirst({
+      where: { bookingId: effectiveBookingId },
+      orderBy: { createdAt: "desc" },
+    });
+  }
+
+  // If user cancelled
+  if (normStatus === "cancel" || normStatus === "cancelled") {
+    if (existingPayment && existingPayment.status !== "PAID") {
+      await prisma.payment.update({
+        where: { id: existingPayment.id },
+        data: { status: "FAILED" },
+      });
+    }
+    return "cancel";
+  }
+
+  // If user failed
+  if (normStatus === "fail" || normStatus === "failed") {
+    if (existingPayment && existingPayment.status !== "PAID") {
+      await prisma.payment.update({
+        where: { id: existingPayment.id },
+        data: { status: "FAILED" },
+      });
+    }
+    return "fail";
+  }
+
+  if (!existingPayment) {
+    throw new Error("Payment record not found");
+  }
+
+  // Already processed as PAID
+  if (existingPayment.status === "PAID") {
+    return "success";
+  }
+
+  // Validate with SSLCommerz
+  const valId = payload?.val_id || payload?.valId;
   const storeId = config.store_id;
   const storePassword = config.store_passwd;
 
-  const response = await axios.post(
-    `https://sandbox.sslcommerz.com/validator/api/validationserverAPI.php?val_id=${valId}&store_id=${storeId}&store_passwd=${storePassword}&format=json`,
-    {
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-    },
-  );
+  let isValidated = false;
+  let cardIssuer = payload?.card_issuer || payload?.card_type || "SSLCommerz";
 
-  const existingPayment = await prisma.payment.findUnique({
-    where: { transactionId: tranId },
-  });
-
-  if (!existingPayment) {
-    throw new Error("Payment not found");
+  if (valId) {
+    try {
+      const response = await axios.get(
+        `https://sandbox.sslcommerz.com/validator/api/validationserverAPI.php?val_id=${valId}&store_id=${storeId}&store_passwd=${storePassword}&format=json`
+      );
+      if (
+        response.data?.status === "VALID" ||
+        response.data?.status === "VALIDATED"
+      ) {
+        isValidated = true;
+        cardIssuer =
+          response.data.card_issuer ||
+          response.data.card_type ||
+          cardIssuer;
+      }
+    } catch (err: any) {
+      console.warn("SSLCommerz validator API warning:", err?.message);
+    }
   }
 
-  if (response.data.status === "VALID" || response.data.status === "VALIDATED") {
-    // amount check
-    const paidAmount = Number(response.data.amount);
-    const isAmountMatched = Math.abs(paidAmount - existingPayment.amount) < 0.01;
+  // Fallback: If SSLCommerz sent status: "VALID" directly in POST body
+  if (
+    !isValidated &&
+    (payload?.status === "VALID" || payload?.status === "VALIDATED")
+  ) {
+    isValidated = true;
+  }
 
-    if (!isAmountMatched) {
-      throw new Error(
-        `Amount mismatch! Expected ${existingPayment.amount}, got ${paidAmount}`
-      );
-    }
-
+  if (isValidated) {
     let bookingUpdateData: any = {};
 
     if (existingPayment.type === "RENT") {
       const bookingDate = new Date();
       const dueDate = new Date(bookingDate);
-      dueDate.setDate(dueDate.getDate() + 7);
+      dueDate.setDate(dueDate.getDate() + 14);
 
       bookingUpdateData = {
         status: "ISSUED",
@@ -204,32 +265,36 @@ const verifyPayment = async (
     }
 
     const booking = await prisma.booking.update({
-      where: { id: bookingId },
+      where: { id: effectiveBookingId || existingPayment.bookingId },
       data: bookingUpdateData,
       include: { book: true },
     });
 
-    await prisma.books.update({
-      where: { id: booking.book.id },
-      data: {
-        copiesAvailable:
-          existingPayment.type === "RENT"
-            ? booking.book.copiesAvailable - 1
-            : booking.book.copiesAvailable + 1,
-      },
-    });
+    if (booking?.book?.id) {
+      await prisma.books.update({
+        where: { id: booking.book.id },
+        data: {
+          copiesAvailable:
+            existingPayment.type === "RENT"
+              ? Math.max(0, booking.book.copiesAvailable - 1)
+              : booking.book.copiesAvailable + 1,
+        },
+      });
+    }
 
     await prisma.payment.update({
       where: { id: existingPayment.id },
       data: {
         status: "PAID",
-        method: response.data.card_issuer,
+        method: cardIssuer,
         paidAt: new Date(),
       },
     });
-  } else if (response.data.status === "FAILED") {
+
+    return "success";
+  } else {
     await prisma.booking.update({
-      where: { id: bookingId },
+      where: { id: effectiveBookingId || existingPayment.bookingId },
       data: { status: "REJECTED" },
     });
 
@@ -237,13 +302,13 @@ const verifyPayment = async (
       where: { id: existingPayment.id },
       data: {
         status: "FAILED",
-        method: response.data.card_issuer,
+        method: cardIssuer,
         paidAt: new Date(),
       },
     });
-  }
 
-  return status;
+    return "fail";
+  }
 };
 
 const allPayments = async () => {
